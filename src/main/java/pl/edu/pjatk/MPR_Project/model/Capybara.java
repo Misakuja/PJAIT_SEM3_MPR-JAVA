@@ -1,8 +1,22 @@
 package pl.edu.pjatk.MPR_Project.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Capybara {
-    String name;
-    int age;
+    private String name;
+    private int age;
+    private long identification;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    Long id;
+
+    public Capybara() {
+    }
 
     public Capybara(String name, int age) {
         this.name = name;
@@ -23,5 +37,27 @@ public class Capybara {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    public long getIdentification() {
+        return identification;
+    }
+
+    private void setIdentification(Capybara capybara) {
+        String name = capybara.getName();
+        String ageString = Integer.valueOf(capybara.getAge()).toString();
+
+        String finalString = name + ageString;
+
+        for(char character : finalString)
     }
 }
