@@ -58,6 +58,5 @@ public class Capybara {
 
         String finalString = name + ageString;
 
-        for(char character : finalString)
     }
 }
