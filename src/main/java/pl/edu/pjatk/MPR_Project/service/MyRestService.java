@@ -31,7 +31,12 @@ public class MyRestService {
             capybaraToReplace.get().setName(capybara.getName());
             capybaraToReplace.get().setAge(capybara.getAge());
             repository.save(capybaraToReplace.get());
+
+            Capybara updatedCapybara = repository.findById(id).get();
+
+            updatedCapybara.setIdentification(updatedCapybara);
         }
+
     }
 
     public void deleteCapybaraById(Long id) {

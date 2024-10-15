@@ -14,10 +14,4 @@ public interface CapybaraRepository extends CrudRepository<Capybara, Long> {
     List<Capybara> findByAge(int age);
 
     Optional<Capybara> findById(Long id);
-
-    void addCapybara(Capybara capybara);
-
-    void patchCapybara(Capybara capybara, Long id);
-
-    void deleteCapybara(Long id);
 }

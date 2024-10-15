@@ -47,16 +47,21 @@ public class Capybara {
         this.id = id;
     }
 
-
     public long getIdentification() {
         return identification;
     }
 
-    private void setIdentification(Capybara capybara) {
+    public void setIdentification(Capybara capybara) {
         String name = capybara.getName();
         String ageString = Integer.valueOf(capybara.getAge()).toString();
 
         String finalString = name + ageString;
 
+        int identification = 0;
+
+        for (int i = 0; i < finalString.length(); i++) {
+            identification += Character.getNumericValue(finalString.charAt(i));
+        }
+        this.identification = identification;
     }
 }
