@@ -16,12 +16,22 @@ public class MyRestService {
     @Autowired
     public MyRestService(CapybaraRepository repository) {
         this.repository = repository;
-        repository.save(new Capybara("Capy1", 2));
-        repository.save(new Capybara("Capy2", 3));
-        repository.save(new Capybara("Capy3", 4));
+
+        Capybara capy1 = new Capybara("Capy1", 2);
+        Capybara capy2 = new Capybara("Capy2", 3);
+        Capybara capy3 = new Capybara("Capy3", 4);
+
+        capy1.setIdentification(capy1);
+        capy2.setIdentification(capy2);
+        capy3.setIdentification(capy3);
+
+        repository.save(capy1);
+        repository.save(capy2);
+        repository.save(capy3);
     }
 
     public void addCapybara(Capybara capybara) {
+        capybara.setIdentification(capybara);
         this.repository.save(capybara);
     }
 
@@ -30,11 +40,12 @@ public class MyRestService {
         if(capybaraToReplace.isPresent()) {
             capybaraToReplace.get().setName(capybara.getName());
             capybaraToReplace.get().setAge(capybara.getAge());
-            repository.save(capybaraToReplace.get());
 
             Capybara updatedCapybara = repository.findById(id).get();
 
             updatedCapybara.setIdentification(updatedCapybara);
+
+            repository.save(capybaraToReplace.get());
         }
 
     }

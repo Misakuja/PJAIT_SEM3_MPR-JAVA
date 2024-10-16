@@ -38,8 +38,8 @@ public class MyRestController {
     }
 
 
-    @PatchMapping("capybara/patch/{id}/")
-    public void patchCapybara(@RequestBody Capybara capybara, @PathVariable("id") Long id) {
+    @PutMapping("capybara/patch/{id}/")
+    public void updateCapybara(@RequestBody Capybara capybara, @PathVariable("id") Long id) {
         myRestService.patchCapybaraById(capybara, id);
     }
 
