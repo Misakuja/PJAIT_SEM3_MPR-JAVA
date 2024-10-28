@@ -56,9 +56,9 @@ public class MyRestServiceTest {
     public void getCapybaraByNameTest() {
         List<Capybara> repoCapybara = new ArrayList<>();
         repoCapybara.add(new Capybara("TEST", 2));
-        when(stringService.lowercase("TEST")).thenReturn("Test");
 
         when(capybaraRepository.findByName("TEST")).thenReturn(repoCapybara.stream().toList());
+        when(stringService.lowercase("TEST")).thenReturn("Test");
 
         myRestService.getByName("TEST");
 
