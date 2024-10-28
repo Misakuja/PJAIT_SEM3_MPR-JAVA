@@ -15,8 +15,7 @@ public class Capybara {
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
 
-    public Capybara() {
-    }
+    public Capybara() {}
 
     public Capybara(String name, int age) {
         this.name = name;

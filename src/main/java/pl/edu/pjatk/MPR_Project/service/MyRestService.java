@@ -12,10 +12,12 @@ import java.util.Optional;
 @Service
 public class MyRestService {
     private CapybaraRepository repository;
+    private StringService stringService;
 
     @Autowired
-    public MyRestService(CapybaraRepository repository) {
+    public MyRestService(CapybaraRepository repository, StringService stringService) {
         this.repository = repository;
+        this.stringService = stringService;
 
         Capybara capy1 = new Capybara("Capy1", 2);
         Capybara capy2 = new Capybara("Capy2", 3);
@@ -31,6 +33,8 @@ public class MyRestService {
     }
 
     public void addCapybara(Capybara capybara) {
+        capybara.setName(stringService.uppercase(capybara.getName()));
+
         capybara.setIdentification(capybara);
         this.repository.save(capybara);
     }
@@ -38,7 +42,7 @@ public class MyRestService {
     public void patchCapybaraById(Capybara capybara, Long id) {
        Optional<Capybara> capybaraToReplace = repository.findById(id);
         if(capybaraToReplace.isPresent()) {
-            capybaraToReplace.get().setName(capybara.getName());
+            capybaraToReplace.get().setName(stringService.uppercase(capybara.getName()));
             capybaraToReplace.get().setAge(capybara.getAge());
 
             Capybara updatedCapybara = repository.findById(id).get();
@@ -55,15 +59,24 @@ public class MyRestService {
     }
 
     public List<Capybara> getByName(String name) {
-        return repository.findByName(name);
+        List<Capybara> capybaraListToLower = repository.findByName(name);
+        capybaraListToLower.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
+
+        return capybaraListToLower;
     }
 
     public List<Capybara> getByAge(int age) {
-        return repository.findByAge(age);
+        List<Capybara> capybaraListToLower = repository.findByAge(age);
+        capybaraListToLower.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
+
+        return capybaraListToLower;
     }
 
     public Optional<Capybara> getById(Long id) {
-        return repository.findById(id);
+        Optional<Capybara> capybaraToLower = repository.findById(id);
+        capybaraToLower.ifPresent(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
+
+        return capybaraToLower;
     }
 }
 
