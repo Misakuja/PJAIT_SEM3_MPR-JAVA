@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class MyRestServiceTest {
@@ -30,8 +31,6 @@ public class MyRestServiceTest {
     public void getCapybaraByIdTest() {
         Capybara repoCapybara = new Capybara("TEST", 2);
         when(capybaraRepository.findById(2L)).thenReturn(Optional.of(repoCapybara));
-        when(stringService.lowercase("TEST")).thenReturn("Test");
-
         myRestService.getById(2L);
 
         verify(capybaraRepository).findById(2L);
@@ -44,8 +43,6 @@ public class MyRestServiceTest {
         repoCapybara.add(new Capybara("TEST", 2));
 
         when(capybaraRepository.findByAge(2)).thenReturn(repoCapybara.stream().toList());
-        when(stringService.lowercase("TEST")).thenReturn("Test");
-
         myRestService.getByAge(2);
 
         verify(capybaraRepository).findByAge(2);
@@ -58,8 +55,6 @@ public class MyRestServiceTest {
         repoCapybara.add(new Capybara("TEST", 2));
 
         when(capybaraRepository.findByName("TEST")).thenReturn(repoCapybara.stream().toList());
-        when(stringService.lowercase("TEST")).thenReturn("Test");
-
         myRestService.getByName("TEST");
 
         verify(capybaraRepository).findByName("TEST");
@@ -79,14 +74,18 @@ public class MyRestServiceTest {
     @Test
     public void patchCapybaraByIdTest() {
         Capybara repoCapybara1 = new Capybara("Test", 2);
+        Capybara repoCapybara2 = new Capybara("TestChanged", 3);
 
         when(capybaraRepository.findById(2L)).thenReturn(Optional.of(repoCapybara1));
-        when(stringService.uppercase("Test")).thenReturn("TEST");
+        when(stringService.uppercase("TestChanged")).thenReturn("TESTCHANGED");
 
-        myRestService.patchCapybaraById(repoCapybara1, 2L);
+        myRestService.patchCapybaraById(repoCapybara2, 2L);
 
-        verify(capybaraRepository, times(2)).findById(2L);
-        verify(stringService).uppercase("Test");
+        assertEquals(3, repoCapybara1.getAge());
+        assertEquals("TESTCHANGED", repoCapybara1.getName());
+
+        verify(capybaraRepository).findById(2L);
+        verify(stringService).uppercase("TestChanged");
         verify(capybaraRepository).save(repoCapybara1);
 
     }

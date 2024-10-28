@@ -40,16 +40,17 @@ public class MyRestService {
     }
 
     public void patchCapybaraById(Capybara capybara, Long id) {
-       Optional<Capybara> capybaraToReplace = repository.findById(id);
-        if(capybaraToReplace.isPresent()) {
-            capybaraToReplace.get().setName(stringService.uppercase(capybara.getName()));
-            capybaraToReplace.get().setAge(capybara.getAge());
+       Optional<Capybara> capybaraToReplaceOptional = repository.findById(id);
 
-            Capybara updatedCapybara = repository.findById(id).get();
+        if(capybaraToReplaceOptional.isPresent()) {
+            Capybara capybaraToReplace = capybaraToReplaceOptional.get();
 
-            updatedCapybara.setIdentification(updatedCapybara);
+            capybaraToReplace.setName(stringService.uppercase(capybara.getName()));
+            capybaraToReplace.setAge(capybara.getAge());
 
-            repository.save(capybaraToReplace.get());
+            capybaraToReplace.setIdentification(capybaraToReplace);
+
+            repository.save(capybaraToReplace);
         }
 
     }
