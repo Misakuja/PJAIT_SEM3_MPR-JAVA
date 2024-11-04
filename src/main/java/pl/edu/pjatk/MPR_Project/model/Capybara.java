@@ -50,9 +50,9 @@ public class Capybara {
         return identification;
     }
 
-    public void setIdentification(Capybara capybara) {
-        String name = capybara.getName();
-        String ageString = Integer.valueOf(capybara.getAge()).toString();
+    public void setIdentification() {
+        String name = this.getName();
+        String ageString = Integer.valueOf(this.getAge()).toString();
 
         String finalString = name + ageString;
 

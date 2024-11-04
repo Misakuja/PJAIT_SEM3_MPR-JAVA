@@ -13,5 +13,7 @@ public interface CapybaraRepository extends CrudRepository<Capybara, Long> {
 
     List<Capybara> findByAge(int age);
 
-    Optional<Capybara> findById(Long id);
+    Optional<Capybara> findById(long id);
+
+    Optional<Capybara> findByIdentification(long identificationNumber);
 }
