@@ -60,9 +60,10 @@ public class MyRestService {
         if (capybaraToReplaceOptional.isEmpty()) {
             throw new CapybaraNotFoundException();
         }
-        if(capybaraToReplaceOptional.get().getName().isEmpty() || capybaraToReplaceOptional.get().getName() == null || capybaraToReplaceOptional.get().getAge() == 0) {
+        if(capybara.getName().isBlank() || capybara.getAge() <= 0) {
             throw new InvalidInputCapybaraException();
         }
+
         Capybara capybaraToReplace = capybaraToReplaceOptional.get();
 
         capybaraToReplace.setName(stringService.uppercase(capybara.getName()));

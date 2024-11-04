@@ -3,6 +3,8 @@ package pl.edu.pjatk.MPR_Project;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
+import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
@@ -10,6 +12,7 @@ import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,18 +131,118 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void addCapybaraThrowsExceptionWhenTheInputIsInvalidTest() {
+    public void addCapybaraThrowsExceptionWhenTheInputIsInvalidDueToAgeTest() {
         Capybara repoCapybara = new Capybara("Test", 0);
 
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
         when(stringService.uppercase("Test")).thenReturn("TEST");
         when(stringService.lowercase("TEST")).thenReturn("Test");
 
-        assertThrows(InvalidInputCapybaraException.class, () -> {
-            this.myRestService.addCapybara(repoCapybara);
-        });
+        assertThrows(InvalidInputCapybaraException.class, () -> this.myRestService.addCapybara(repoCapybara));
+
     }
 
-    //TODO: All the other tests
+    @Test
+    public void addCapybaraThrowsExceptionWhenTheInputIsInvalidDueToNameTest() {
+        Capybara repoCapybara = new Capybara("", 2);
 
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
+        when(stringService.uppercase("")).thenReturn("");
+        when(stringService.lowercase("")).thenReturn("");
+
+        assertThrows(InvalidInputCapybaraException.class, () -> this.myRestService.addCapybara(repoCapybara));
+    }
+
+    @Test
+    public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
+        Capybara repoCapybara = new Capybara("Test", 2);
+
+        when(stringService.uppercase("Test")).thenReturn("TEST");
+
+        repoCapybara.setIdentification();
+        long existingIdentification = repoCapybara.getIdentification();
+
+        when(capybaraRepository.findByIdentification(existingIdentification)).thenReturn(Optional.of(repoCapybara));
+
+        assertThrows(CapybaraAlreadyExists.class, () -> this.myRestService.addCapybara(repoCapybara));
+    }
+
+    @Test
+    public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() {
+        Capybara capybaraToPatch = new Capybara();
+
+        when(capybaraRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(CapybaraNotFoundException.class, () -> this.myRestService.patchCapybaraById(capybaraToPatch, 2L));
+    }
+
+    @Test
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() {
+        Capybara capybaraToSwitchTo = new Capybara("", 2);
+        Capybara existingCapybara = new Capybara("Test2", 3);
+
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
+
+        assertThrows(InvalidInputCapybaraException.class, () -> myRestService.patchCapybaraById(capybaraToSwitchTo, 2L));
+    }
+
+    @Test
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() {
+        Capybara capybaraToSwitchTo = new Capybara("Test", 0);
+        Capybara existingCapybara = new Capybara("Test", 3);
+
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
+
+        assertThrows(InvalidInputCapybaraException.class, () -> myRestService.patchCapybaraById(capybaraToSwitchTo, 2L));
+    }
+
+    @Test
+    public void patchCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
+        Capybara capybara = new Capybara("Test", 2);
+        Capybara existingCapybara = new Capybara("Test", 2);
+
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
+        when(capybaraRepository.findByIdentification(102)).thenReturn(Optional.of(existingCapybara));
+        when(stringService.uppercase("Test")).thenReturn("TEST");
+
+        assertThrows(CapybaraAlreadyExists.class, () -> myRestService.patchCapybaraById(capybara, 2L));
+    }
+
+    @Test
+    public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() {
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.deleteCapybaraById(2L));
+    }
+
+    @Test
+    public void getByNameThrowsExceptionCapybaraNotFoundTest() {
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+        when(stringService.lowercase("TEST")).thenReturn("Test");
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByName("TEST"));
+    }
+
+    @Test
+    public void getByAgeThrowsExceptionCapybaraNotFoundTest() {
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByAge(2));
+    }
+
+    @Test
+    public void getByIdThrowsExceptionCapybaraNotFoundTest() {
+        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getById(2L));
+
+    }
+
+    @Test
+    public void getAllCapybaraObjectsThrowsExceptionCapybaraNotFoundTest() {
+        when(capybaraRepository.findAll()).thenReturn(Collections.emptyList());
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getAllCapybaraObjects());
+    }
 }
+
