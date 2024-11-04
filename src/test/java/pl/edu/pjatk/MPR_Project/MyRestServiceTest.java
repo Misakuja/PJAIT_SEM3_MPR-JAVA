@@ -124,8 +124,6 @@ public class MyRestServiceTest {
         verify(capybaraRepository).findAll();
         verify(stringService).lowercase("Test1");
         verify(stringService).lowercase("Test2");
-
-
     }
 
 
