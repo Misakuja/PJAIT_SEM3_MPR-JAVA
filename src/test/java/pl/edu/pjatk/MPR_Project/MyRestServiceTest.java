@@ -102,5 +102,31 @@ public class MyRestServiceTest {
         verify(capybaraRepository).save(repoCapybara);
     }
 
+    @Test
+    public void getAllCapybaraObjectsTest() {
+        List<Capybara> repoCapybaraList = new ArrayList<>();
+        Capybara repoCapybara1 = new Capybara("Test1", 2);
+        Capybara repoCapybara2 = new Capybara("Test2", 3);
+
+        repoCapybaraList.add(repoCapybara1);
+        repoCapybaraList.add(repoCapybara2);
+
+        when(capybaraRepository.findAll()).thenReturn(repoCapybaraList);
+        when(stringService.lowercase("Test1")).thenReturn("Test1");
+        when(stringService.lowercase("Test2")).thenReturn("Test2");
+
+        List<Capybara> result = myRestService.getAllCapybaraObjects();
+
+        assertEquals(2, result.size());
+        assertEquals("Test1", result.get(0).getName());
+        assertEquals("Test2", result.get(1).getName());
+
+        verify(capybaraRepository).findAll();
+        verify(stringService).lowercase("Test1");
+        verify(stringService).lowercase("Test2");
+
+
+    }
+
 
 }

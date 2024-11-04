@@ -10,11 +10,16 @@ import java.util.Optional;
 
 @RestController
 public class MyRestController {
-    private MyRestService myRestService;
+    private final MyRestService myRestService;
 
     @Autowired
      public MyRestController(MyRestService myRestService) {
         this.myRestService = myRestService;
+    }
+
+    @GetMapping("capybara/get/all/")
+    public List<Capybara> getAll() {
+        return this.myRestService.getAllCapybaraObjects();
     }
 
     @GetMapping("capybara/find/name/{name}/")
@@ -46,6 +51,5 @@ public class MyRestController {
     public void deleteCapybara(@PathVariable("id") Long id) {
         myRestService.deleteCapybaraById(id);
     }
-
 
 }

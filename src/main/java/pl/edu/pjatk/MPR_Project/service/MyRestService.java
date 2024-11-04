@@ -79,5 +79,12 @@ public class MyRestService {
 
         return capybaraToLower;
     }
+
+    public List<Capybara> getAllCapybaraObjects() {
+        List<Capybara> capybaraList = (List<Capybara>) repository.findAll();
+        capybaraList.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
+
+        return capybaraList;
+    }
 }
 
