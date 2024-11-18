@@ -1,14 +1,18 @@
 package pl.edu.pjatk.MPR_Project.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 
+import java.io.OutputStream;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class MyRestController {
@@ -54,6 +58,20 @@ public class MyRestController {
     @DeleteMapping("capybara/delete/{id}/")
     public ResponseEntity<Void> deleteCapybara(@PathVariable("id") Long id) {
         this.myRestService.deleteCapybaraById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("capybara/get/information/{id}/")
+    public ResponseEntity<OutputStream> getInformation(@PathVariable("id") Long id, HttpServletResponse response) throws Exception {
+        PDDocument document = myRestService.getInformationOfCapybaraById(id, response);
+
+        response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=capybaraPDF.pdf");
+        OutputStream out = response.getOutputStream();
+        document.save(out);
+        out.flush();
+        document.close();
+
         return ResponseEntity.ok().build();
     }
 
