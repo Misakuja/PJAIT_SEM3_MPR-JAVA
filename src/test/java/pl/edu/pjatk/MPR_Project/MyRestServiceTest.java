@@ -9,6 +9,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.mock.web.MockHttpServletResponse;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
@@ -17,6 +18,7 @@ import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -28,8 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class MyRestServiceTest {
-    private StringService stringService;
     private CapybaraRepository capybaraRepository;
+    private StringService stringService;
     private MyRestService myRestService;
 
     @BeforeEach
@@ -37,6 +39,15 @@ public class MyRestServiceTest {
         this.capybaraRepository = Mockito.mock(CapybaraRepository.class);
         this.stringService = Mockito.mock(StringService.class);
         this.myRestService = new MyRestService(capybaraRepository, stringService);
+    }
+
+    @Test
+    public void setIdentificationTest() {
+        Capybara capybara = new Capybara("Test", 2);
+
+        capybara.setIdentification();
+
+        assertEquals(102, capybara.getIdentification());
     }
 
     @Test
@@ -139,8 +150,9 @@ public class MyRestServiceTest {
 
     @Test
     void testGetInformationOfCapybaraById_CapybaraFound() {
-        //todo
+    //todo
     }
+
 
     @Test
     public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() throws InvalidInputCapybaraException {
