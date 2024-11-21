@@ -148,9 +148,46 @@ public class MyRestServiceTest {
         verify(stringService).lowercase("Test2");
     }
 
+    //todo fix the test below
     @Test
-    void testGetInformationOfCapybaraById_CapybaraFound() {
-    //todo
+    void testGetInformationOfCapybaraById_CapybaraFound() throws Exception {
+        Capybara capybara = new Capybara("Test", 2);
+        Field nameField = Capybara.class.getDeclaredField("name");
+        Field ageField = Capybara.class.getDeclaredField("age");
+        Field idField = Capybara.class.getDeclaredField("id");
+        Field identificationField = Capybara.class.getDeclaredField("identification");
+
+        when(capybaraRepository.findById(Long.valueOf(1L))).thenReturn(Optional.of(capybara));
+
+        PDDocument documentSpy = spy(new PDDocument());
+        PDPage pageMock = mock(PDPage.class);
+        PDPageContentStream contentStreamMock = mock(PDPageContentStream.class);
+
+        doNothing().when(documentSpy).addPage(any(PDPage.class));
+
+        nameField.setAccessible(true);
+        ageField.setAccessible(true);
+        idField.setAccessible(true);
+        identificationField.setAccessible(true);
+
+        nameField.set(capybara, "Test");
+        ageField.set(capybara, 2);
+        idField.set(capybara, 1L);
+        identificationField.set(capybara, 20);
+
+        List<Field> fields = new ArrayList<>(List.of(Capybara.class.getDeclaredFields()));
+
+        for(Field field : fields) {
+            field.setAccessible(true);
+            String fieldText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
+
+            contentStreamMock.showText(fieldText);
+            contentStreamMock.newLine();
+        }
+
+        PDDocument finalDocument = myRestService.getInformationOfCapybaraById(1L, mock(HttpServletResponse.class));
+
+        assertEquals(1, finalDocument.getNumberOfPages());
     }
 
 
