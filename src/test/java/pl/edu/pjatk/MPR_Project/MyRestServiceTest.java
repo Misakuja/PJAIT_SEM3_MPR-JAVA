@@ -1,5 +1,11 @@
 package pl.edu.pjatk.MPR_Project;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,13 +17,14 @@ import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class MyRestServiceTest {
@@ -131,7 +138,12 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void addCapybaraThrowsExceptionWhenTheInputIsInvalidDueToAgeTest() {
+    void testGetInformationOfCapybaraById_CapybaraFound() {
+        //todo
+    }
+
+    @Test
+    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() throws InvalidInputCapybaraException {
         Capybara repoCapybara = new Capybara("Test", 0);
 
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
@@ -143,7 +155,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void addCapybaraThrowsExceptionWhenTheInputIsInvalidDueToNameTest() {
+    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() throws InvalidInputCapybaraException {
         Capybara repoCapybara = new Capybara("", 2);
 
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
@@ -154,7 +166,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
+    public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() throws CapybaraAlreadyExists {
         Capybara repoCapybara = new Capybara("Test", 2);
 
         when(stringService.uppercase("Test")).thenReturn("TEST");
@@ -168,7 +180,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() {
+    public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         Capybara capybaraToPatch = new Capybara();
 
         when(capybaraRepository.findById(2L)).thenReturn(Optional.empty());
@@ -177,7 +189,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() {
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() throws InvalidInputCapybaraException {
         Capybara capybaraToSwitchTo = new Capybara("", 2);
         Capybara existingCapybara = new Capybara("Test2", 3);
 
@@ -187,7 +199,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() {
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() throws InvalidInputCapybaraException {
         Capybara capybaraToSwitchTo = new Capybara("Test", 0);
         Capybara existingCapybara = new Capybara("Test", 3);
 
@@ -197,7 +209,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
+    public void patchCapybaraThrowsExceptionCapybaraAlreadyExistsTest() throws CapybaraAlreadyExists {
         Capybara capybara = new Capybara("Test", 2);
         Capybara existingCapybara = new Capybara("Test", 2);
 
@@ -209,14 +221,14 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() {
+    public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.deleteCapybaraById(2L));
     }
 
     @Test
-    public void getByNameThrowsExceptionCapybaraNotFoundTest() {
+    public void getByNameThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
         when(stringService.lowercase("TEST")).thenReturn("Test");
 
@@ -224,14 +236,14 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void getByAgeThrowsExceptionCapybaraNotFoundTest() {
+    public void getByAgeThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByAge(2));
     }
 
     @Test
-    public void getByIdThrowsExceptionCapybaraNotFoundTest() {
+    public void getByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getById(2L));
@@ -239,10 +251,47 @@ public class MyRestServiceTest {
     }
 
     @Test
-    public void getAllCapybaraObjectsThrowsExceptionCapybaraNotFoundTest() {
+    public void getAllCapybaraObjectsThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         when(capybaraRepository.findAll()).thenReturn(Collections.emptyList());
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getAllCapybaraObjects());
     }
+
+    @Test
+    public void getInformationOfCapybaraByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
+        long id = 1L;
+        when(capybaraRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
+    }
+
+    @Test
+    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIOExceptionTest() throws IOException {
+        long id = 1L;
+        Capybara capybara = new Capybara();
+        when(capybaraRepository.findById(id)).thenReturn(Optional.of(capybara));
+
+        PDPageContentStream contentStreamMock = mock(PDPageContentStream.class);
+        doThrow(new IOException("IOException Mock")).when(contentStreamMock).close();
+
+        assertThrows(RuntimeException.class, () -> {
+            myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class));
+        });
+    }
+
+    @Test
+    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIllegalAccessExceptionTest() throws IllegalAccessException {
+        long id = 1L;
+        Capybara capybara = new Capybara();
+        when(capybaraRepository.findById(id)).thenReturn(Optional.of(capybara));
+
+        Field mockField = mock(Field.class);
+        doThrow(new IllegalAccessException("IllegalAccessException Mock")).when(mockField).get(any());
+
+        assertThrows(RuntimeException.class, () -> {
+            myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class));
+        });
+    }
+
 }
 
