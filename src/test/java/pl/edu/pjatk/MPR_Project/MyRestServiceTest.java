@@ -4,12 +4,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.mock.web.MockHttpServletResponse;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
@@ -18,7 +17,6 @@ import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -30,8 +28,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class MyRestServiceTest {
+    @Mock
     private CapybaraRepository capybaraRepository;
+    @Mock
     private StringService stringService;
+    @InjectMocks
     private MyRestService myRestService;
 
     @BeforeEach
