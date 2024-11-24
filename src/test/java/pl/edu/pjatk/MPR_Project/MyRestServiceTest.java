@@ -2,13 +2,13 @@ package pl.edu.pjatk.MPR_Project;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
@@ -32,14 +32,23 @@ public class MyRestServiceTest {
     private CapybaraRepository capybaraRepository;
     @Mock
     private StringService stringService;
+    @Mock
+    private PDPageContentStream contentStream;
+    @Mock
+    private PDDocument document;
     @InjectMocks
     private MyRestService myRestService;
 
     @BeforeEach
     public void setup() {
-        this.capybaraRepository = Mockito.mock(CapybaraRepository.class);
-        this.stringService = Mockito.mock(StringService.class);
-        this.myRestService = new MyRestService(capybaraRepository, stringService);
+        this.capybaraRepository = mock(CapybaraRepository.class);
+        this.contentStream = mock(PDPageContentStream.class);
+        this.document = mock(PDDocument.class);
+
+        this.stringService = mock(StringService.class);
+        this.myRestService = new MyRestService(capybaraRepository, stringService, document, contentStream);
+
+
     }
 
     @Test
@@ -149,46 +158,38 @@ public class MyRestServiceTest {
         verify(stringService).lowercase("Test2");
     }
 
-    //todo fix the test below
     @Test
     void testGetInformationOfCapybaraById_CapybaraFound() throws Exception {
         Capybara capybara = new Capybara("Test", 2);
-        Field nameField = Capybara.class.getDeclaredField("name");
-        Field ageField = Capybara.class.getDeclaredField("age");
-        Field idField = Capybara.class.getDeclaredField("id");
-        Field identificationField = Capybara.class.getDeclaredField("identification");
+        capybara.setId(1L);
+        capybara.setIdentification();
 
         when(capybaraRepository.findById(Long.valueOf(1L))).thenReturn(Optional.of(capybara));
 
-        PDDocument documentSpy = spy(new PDDocument());
-        PDPage pageMock = mock(PDPage.class);
-        PDPageContentStream contentStreamMock = mock(PDPageContentStream.class);
+        PDDocument resultDocument = myRestService.getInformationOfCapybaraById(1L, mock(HttpServletResponse.class));
 
-        doNothing().when(documentSpy).addPage(any(PDPage.class));
+        assertNotNull(resultDocument);
+        verify(contentStream).beginText();
+        verify(contentStream).newLineAtOffset(anyFloat(), anyFloat());
+        verify(contentStream).setFont(any(PDType1Font.class), anyFloat());
+        verify(contentStream).setLeading(anyFloat());
 
-        nameField.setAccessible(true);
-        ageField.setAccessible(true);
-        idField.setAccessible(true);
-        identificationField.setAccessible(true);
+        Field[] fields = Capybara.class.getDeclaredFields();
 
-        nameField.set(capybara, "Test");
-        ageField.set(capybara, 2);
-        idField.set(capybara, 1L);
-        identificationField.set(capybara, 20);
+        ArgumentCaptor<String> textCaptor = ArgumentCaptor.forClass(String.class);
+        verify(contentStream, times(fields.length)).showText(textCaptor.capture());
+        List<String> capturedText = textCaptor.getAllValues();
 
-        List<Field> fields = new ArrayList<>(List.of(Capybara.class.getDeclaredFields()));
-
-        for(Field field : fields) {
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
             field.setAccessible(true);
-            String fieldText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
-
-            contentStreamMock.showText(fieldText);
-            contentStreamMock.newLine();
+            String expectedText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
+            assertEquals(expectedText, capturedText.get(i));
         }
 
-        PDDocument finalDocument = myRestService.getInformationOfCapybaraById(1L, mock(HttpServletResponse.class));
-
-        assertEquals(1, finalDocument.getNumberOfPages());
+        verify(contentStream, times(fields.length)).newLine();
+        verify(contentStream).endText();
+        verify(contentStream).close();
     }
 
 
@@ -324,9 +325,7 @@ public class MyRestServiceTest {
         PDPageContentStream contentStreamMock = mock(PDPageContentStream.class);
         doThrow(new IOException("IOException Mock")).when(contentStreamMock).close();
 
-        assertThrows(RuntimeException.class, () -> {
-            myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class));
-        });
+        assertThrows(RuntimeException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
     }
 
     @Test
@@ -338,9 +337,7 @@ public class MyRestServiceTest {
         Field mockField = mock(Field.class);
         doThrow(new IllegalAccessException("IllegalAccessException Mock")).when(mockField).get(any());
 
-        assertThrows(RuntimeException.class, () -> {
-            myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class));
-        });
+        assertThrows(RuntimeException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
     }
 
 }

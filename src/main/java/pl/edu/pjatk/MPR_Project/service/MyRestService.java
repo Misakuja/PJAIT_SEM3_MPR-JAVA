@@ -2,13 +2,10 @@ package pl.edu.pjatk.MPR_Project.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
@@ -17,9 +14,7 @@ import pl.edu.pjatk.MPR_Project.model.Capybara;
 import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,11 +23,21 @@ public class MyRestService {
     private final CapybaraRepository capybaraRepository;
     private final CapybaraRepository repository;
     private final StringService stringService;
+    private final PDDocument document;
+    private final PDPageContentStream contentStream;
+    private static final List<Field> CAPYBARA_FIELDS;
+
+    static {
+        CAPYBARA_FIELDS = List.of(Capybara.class.getDeclaredFields());
+        CAPYBARA_FIELDS.forEach(field -> field.setAccessible(true));
+    }
 
     @Autowired
-    public MyRestService(CapybaraRepository repository, StringService stringService) {
+    public MyRestService(CapybaraRepository repository, StringService stringService, PDDocument document, PDPageContentStream contentStream) {
         this.repository = repository;
         this.stringService = stringService;
+        this.document = document;
+        this.contentStream = contentStream;
 
         Capybara capy1 = new Capybara("Capy1", 2);
         Capybara capy2 = new Capybara("Capy2", 3);
@@ -147,23 +152,12 @@ public class MyRestService {
         Capybara capybara = capybaraToLower.get();
 
         try {
-            PDDocument document = new PDDocument();
-
-            PDPage addPage = new PDPage();
-            document.addPage(addPage);
-
-            PDPage page = document.getPage(0);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
             contentStream.beginText();
             contentStream.newLineAtOffset(25, 700);
             contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN), 12);
             contentStream.setLeading(14.5f);
 
-            Class<? extends Capybara> clazz = capybara.getClass();
-            List<Field> fields = new ArrayList<>(List.of(clazz.getDeclaredFields()));
-
-            for (Field field : fields) {
-                field.setAccessible(true);
+            for (Field field : CAPYBARA_FIELDS) {
                 String fieldText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
                 contentStream.showText(fieldText);
                 contentStream.newLine();
