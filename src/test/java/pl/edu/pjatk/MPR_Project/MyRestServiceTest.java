@@ -160,7 +160,7 @@ public class MyRestServiceTest {
     }
 
     @Test
-    void testGetInformationOfCapybaraById_CapybaraFound() throws Exception {
+    void testGetInformationOfCapybaraByIdCapybaraFound() throws Exception {
         Capybara capybara = new Capybara("Test", 2);
         capybara.setId(1L);
         capybara.setIdentification();
