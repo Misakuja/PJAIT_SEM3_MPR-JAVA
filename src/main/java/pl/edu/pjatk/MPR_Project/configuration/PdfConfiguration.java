@@ -3,6 +3,9 @@ package pl.edu.pjatk.MPR_Project.configuration;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,5 +26,9 @@ public class PdfConfiguration {
         return new PDPageContentStream(document, page);
     }
 
+    @Bean
+    public PDType1Font pdFont() {
+        return new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN);
+    }
 }
 

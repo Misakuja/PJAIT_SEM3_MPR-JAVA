@@ -36,6 +36,8 @@ public class MyRestServiceTest {
     private PDPageContentStream contentStream;
     @Mock
     private PDDocument document;
+    @Mock
+    private PDType1Font font;
     @InjectMocks
     private MyRestService myRestService;
 
@@ -44,11 +46,10 @@ public class MyRestServiceTest {
         this.capybaraRepository = mock(CapybaraRepository.class);
         this.contentStream = mock(PDPageContentStream.class);
         this.document = mock(PDDocument.class);
+        this.font = mock(PDType1Font.class);
 
         this.stringService = mock(StringService.class);
-        this.myRestService = new MyRestService(capybaraRepository, stringService, document, contentStream);
-
-
+        this.myRestService = new MyRestService(capybaraRepository, stringService, document, contentStream, font);
     }
 
     @Test

@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
@@ -25,6 +24,7 @@ public class MyRestService {
     private final StringService stringService;
     private final PDDocument document;
     private final PDPageContentStream contentStream;
+    private final PDType1Font font;
     private static final List<Field> CAPYBARA_FIELDS;
 
     static {
@@ -33,11 +33,12 @@ public class MyRestService {
     }
 
     @Autowired
-    public MyRestService(CapybaraRepository repository, StringService stringService, PDDocument document, PDPageContentStream contentStream) {
+    public MyRestService(CapybaraRepository repository, StringService stringService, PDDocument document, PDPageContentStream contentStream, PDType1Font font) {
         this.repository = repository;
         this.stringService = stringService;
         this.document = document;
         this.contentStream = contentStream;
+        this.font = font;
 
         Capybara capy1 = new Capybara("Capy1", 2);
         Capybara capy2 = new Capybara("Capy2", 3);
@@ -154,7 +155,7 @@ public class MyRestService {
         try {
             contentStream.beginText();
             contentStream.newLineAtOffset(25, 700);
-            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN), 12);
+            contentStream.setFont(font, 12);
             contentStream.setLeading(14.5f);
 
             for (Field field : CAPYBARA_FIELDS) {
