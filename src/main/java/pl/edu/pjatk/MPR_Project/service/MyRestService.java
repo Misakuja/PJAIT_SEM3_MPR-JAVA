@@ -40,9 +40,9 @@ public class MyRestService {
         this.contentStream = contentStream;
         this.font = font;
 
-        Capybara capy1 = new Capybara("Capy1", 2);
-        Capybara capy2 = new Capybara("Capy2", 3);
-        Capybara capy3 = new Capybara("Capy3", 4);
+        Capybara capy1 = new Capybara("CAPY1", 2);
+        Capybara capy2 = new Capybara("CAPY2", 3);
+        Capybara capy3 = new Capybara("CAPY3", 4);
 
         capy1.setIdentification();
         capy2.setIdentification();
@@ -105,7 +105,7 @@ public class MyRestService {
     }
 
     public List<Capybara> getByName(String name) {
-        List<Capybara> capybaraListToLower = repository.findByName(name);
+        List<Capybara> capybaraListToLower = repository.findByName(name.toUpperCase());
         capybaraListToLower.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
 
         if (capybaraListToLower.isEmpty()) {
