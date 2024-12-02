@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find By Name Capybara Form</title>
+</head>
+<body>
+<form action="#" th:action="@{/form/find/byName}" th:object="${capybara}" method="POST">
+  <label for="name">Name:</label>
+  <input type="text" id="name" name="name" th:field="*{name}" />
+  <input type="submit" value="Submit">
+</form>
+</body>
+</html>

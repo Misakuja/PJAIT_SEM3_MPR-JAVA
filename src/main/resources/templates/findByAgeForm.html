@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find By Age Capybara Form</title>
+</head>
+<body>
+<form action="#" th:action="@{/form/find/byAge}" th:object="${capybara}" method="POST">
+  <label for="age">Age:</label>
+  <input type="text" id="age" name="age" th:field="*{age}" />
+  <input type="submit" value="Submit">
+</form>
+</body>
+</html>
