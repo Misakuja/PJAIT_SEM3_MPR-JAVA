@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Display List</title>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Identification</th>
+        <th>Id</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="capybara: ${capybaras}">
+        <td th:text="${capybara.name}"></td>
+        <td th:text="${capybara.age}"></td>
+        <td th:text="${capybara.identification}"></td>
+        <td th:text="${capybara.id}"></td>
+    </tr>
+    </tbody>
+</table>
+<button onclick="location.href = '/form/add'">Add Capybara Form</button>
+<button onclick="location.href = '/form/delete'">Delete Capybara Form</button>
+<button onclick="location.href = '/form/update'">Update Capybara Form</button>
+<button onclick="location.href = '/view/all'">Update Capybara Form</button>
+<button onclick="location.href = '/form/find/byId'">Show Capybara By Id Form</button>
+<button onclick="location.href = '/form/find/byName'">Show Capybara By Name Form</button>
+<button onclick="location.href = '/form/find/showPdf'">Show Capybara PDF</button>
+</body>
+</html>
