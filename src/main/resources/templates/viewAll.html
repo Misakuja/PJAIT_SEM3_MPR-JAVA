@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capybara</title>
+</head>
+<body>
+<h1>All Capybaras in the DB:</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Identification</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="capybara: ${capybaras}">
+            <td th:text="${capybara.name}"></td>
+            <td th:text="${capybara.age}"></td>
+            <td th:text="${capybara.identification}"></td>
+
+        </tr>
+    </tbody>
+</table>
+<button onclick="location.href = 'http://localhost:8080/form/add'">Add Capybara Form</button>
+</body>
+</html>
