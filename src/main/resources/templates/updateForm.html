@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Capybara Form</title>
+    <link href="form.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<form action="#" th:action="@{/form/add}" th:object="${capybara}" method="POST">
-    <label for="id">Id</label>
-    <input type="text" id="id" th:field="*{id}" />
-    <label for="name">Name</label>
-    <input type="text" id="name" th:field="*{name}" />
-    <label for="age">Age</label>
-    <input type="text" id="age" th:field="*{age}" />
-    <input type="submit" value="Submit">
-</form>
+<h1>Update Capybara</h1>
+<div class="box">
+    <form action="#" th:action="@{/form/add}" th:object="${capybara}" method="POST">
+        <label for="id">Id</label>
+        <input type="text" id="id" th:field="*{id}"/>
+        <label for="name">Name</label>
+        <input type="text" id="name" th:field="*{name}"/>
+        <label for="age">Age</label>
+        <input type="text" id="age" th:field="*{age}"/>
+        <input type="submit" value="Submit">
+
+        <button onclick="location.href = '/view/all'">Go back</button>
+    </form>
+</div>
 </body>
 </html>

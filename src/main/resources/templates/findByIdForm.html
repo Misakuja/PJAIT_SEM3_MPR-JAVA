@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Find By Id Capybara Form</title>
+    <meta charset="UTF-8">
+    <title>Find By Id Capybara Form</title>
+    <link href="form.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-<form action="#" th:action="@{/form/find/byId}" th:object="${capybara}" method="POST">
-  <label for="id">Id:</label>
-  <input type="text" id="id" name="id" th:field="*{id}" />
-  <input type="submit" value="Submit">
-</form>
+<h1>Find Capybara By Id</h1>
+<div class="box">
+
+    <form action="#" th:action="@{/form/find/byId}" th:object="${capybara}" method="POST">
+        <label for="id">Id:</label>
+        <input type="text" id="id" name="id" th:field="*{id}"/>
+        <input type="submit" value="Submit">
+
+        <button onclick="location.href = '/view/all'">Go back</button>
+    </form>
+</div>
 </body>
 </html>
