@@ -60,19 +60,4 @@ input[type="submit"] {
     cursor: pointer;
 }
 
-input[type="submit"]:hover, button:hover {
-    background-color: #c89ddd;
-}
 
-button {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    padding: 8px 12px;
-    background-color: #e4d5ec;
-    border: none;
-    border-radius: 4px;
-    color: #495057;
-    font-size: 13px;
-    cursor: pointer;
-}
