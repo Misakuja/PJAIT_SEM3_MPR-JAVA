@@ -24,6 +24,7 @@ public class MyRestService {
     private final StringService stringService;
     private final PDDocument document;
     private final PDPageContentStream contentStream;
+
     private final PDType1Font font;
     private static final List<Field> CAPYBARA_FIELDS;
 
