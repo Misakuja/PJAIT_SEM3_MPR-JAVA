@@ -21,7 +21,7 @@ public class MyViewController {
     }
 
     //Get all
-    @GetMapping("view/all")
+    @GetMapping("/")
     public String viewAll(Model model) {
         model.addAttribute("capybaras", service.getAllCapybaraObjects());
         return "displayCapybaraList";
@@ -37,7 +37,7 @@ public class MyViewController {
     @PostMapping("form/add")
     public String submitAddForm(@ModelAttribute Capybara newCapybara) {
         this.service.addCapybara(newCapybara);
-        return "redirect:/view/all";
+        return "redirect:/";
     }
 
     //delete
@@ -51,7 +51,7 @@ public class MyViewController {
     public String submitDeleteForm(Capybara capybara) {
         Long inputId = capybara.getId();
         this.service.deleteCapybaraById(inputId);
-        return "redirect:/view/all";
+        return "redirect:/";
     }
 
     //patch
@@ -66,7 +66,7 @@ public class MyViewController {
         Long id = capybara.getId();
 
         this.service.patchCapybaraById(capybara, id);
-        return "redirect:/view/all";
+        return "redirect:/";
     }
 
     //find by id
