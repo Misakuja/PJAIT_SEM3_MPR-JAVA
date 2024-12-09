@@ -5,9 +5,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import pl.edu.pjatk.MPR_Project.service.MyRestService;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ActiveProfiles("test")
 public class AddCapybaraFormTest {
-    WebDriver driver;
+    private WebDriver driver;
+
+    @Autowired
+    MyRestService myRestService;
 
     @BeforeEach
     public void setUp() {
@@ -20,12 +31,18 @@ public class AddCapybaraFormTest {
     }
 
     @Test
-    public void testAddCapybaraForm() {
-        AddCapybaraFormPage addCapybaraFormPage = new AddCapybaraFormPage(driver)
+    public void addCapybaraFormTest() {
+        String nameInputText = "Test";
+        String ageInputText = "3";
+        AddCapybaraFormPage addCapybaraFormPage = new AddCapybaraFormPage(driver, myRestService)
                 .open()
-                .fillInNameInput("Test")
-                .fillInAgeInput("3");
+                .fillInNameInput(nameInputText)
+                .fillInAgeInput(ageInputText);
         DisplayCapybaraListPage displayCapybaraListPage = addCapybaraFormPage.submitForm();
+
+        assertTrue(displayCapybaraListPage.areButtonsVisible());
+        assertTrue(displayCapybaraListPage.isTableVisible());
+        assertTrue(displayCapybaraListPage.isLastRowContentCorrect(nameInputText, ageInputText));
     }
 
 }

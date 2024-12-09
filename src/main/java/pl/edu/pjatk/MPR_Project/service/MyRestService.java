@@ -2,8 +2,10 @@ package pl.edu.pjatk.MPR_Project.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
@@ -14,6 +16,7 @@ import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,10 +25,6 @@ public class MyRestService {
     private final CapybaraRepository capybaraRepository;
     private final CapybaraRepository repository;
     private final StringService stringService;
-    private final PDDocument document;
-    private final PDPageContentStream contentStream;
-
-    private final PDType1Font font;
     private static final List<Field> CAPYBARA_FIELDS;
 
     static {
@@ -34,12 +33,10 @@ public class MyRestService {
     }
 
     @Autowired
-    public MyRestService(CapybaraRepository repository, StringService stringService, PDDocument document, PDPageContentStream contentStream, PDType1Font font) {
+    public MyRestService(CapybaraRepository repository, StringService stringService) {
         this.repository = repository;
         this.stringService = stringService;
-        this.document = document;
-        this.contentStream = contentStream;
-        this.font = font;
+
 
         Capybara capy1 = new Capybara("CAPY1", 2);
         Capybara capy2 = new Capybara("CAPY2", 3);
@@ -99,7 +96,8 @@ public class MyRestService {
     }
 
     public void deleteCapybaraById(Long id) {
-        if (repository.findById(id).isEmpty()) {
+        //sout: id = 4
+        if (repository.findById(id).isEmpty()) { //goes here?
             throw new CapybaraNotFoundException();
         }
         repository.deleteById(id);
@@ -152,21 +150,26 @@ public class MyRestService {
             throw new CapybaraNotFoundException();
         }
         Capybara capybara = capybaraToLower.get();
-
         try {
+            PDDocument document = new PDDocument();
+            PDPage addPage = new PDPage();
+            document.addPage(addPage);
+            PDPage page = document.getPage(0);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
             contentStream.beginText();
             contentStream.newLineAtOffset(25, 700);
-            contentStream.setFont(font, 12);
+            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN), 12);
             contentStream.setLeading(14.5f);
-
-            for (Field field : CAPYBARA_FIELDS) {
+            Class<? extends Capybara> clazz = capybara.getClass();
+            List<Field> fields = new ArrayList<>(List.of(clazz.getDeclaredFields()));
+            for (Field field : fields) {
+                field.setAccessible(true);
                 String fieldText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
                 contentStream.showText(fieldText);
                 contentStream.newLine();
             }
             contentStream.endText();
             contentStream.close();
-
             return document;
         } catch (IOException | IllegalAccessException e) {
             throw new RuntimeException(e);

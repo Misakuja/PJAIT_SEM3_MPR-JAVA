@@ -1,10 +1,12 @@
 package pl.edu.pjatk.MPR_Project;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
 public class StringServiceTest {
 
     @Test
