@@ -4,13 +4,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import pl.edu.pjatk.MPR_Project.service.MyRestService;
-
 import java.util.List;
 
 public class DisplayCapybaraListPage {
     private final WebDriver driver;
-    private final MyRestService service;
 
     @FindBy(id = "table")
     private WebElement table;
@@ -21,14 +18,13 @@ public class DisplayCapybaraListPage {
     @FindBy(css = "#table tbody tr")
     private List<WebElement> tableRows;
 
-    public DisplayCapybaraListPage(WebDriver driver, MyRestService service) {
+    public DisplayCapybaraListPage(WebDriver driver) {
         this.driver = driver;
-        this.service = service;
         PageFactory.initElements(driver, this);
     }
 
     public DisplayCapybaraListPage open() {
-        this.driver.get("http://localhost:8080/");
+        this.driver.get("http://localhost:8081/");
         return this;
     }
 
@@ -45,12 +41,6 @@ public class DisplayCapybaraListPage {
         String rowText = lastRow.getText();
         return rowText.contains(name) && rowText.contains(age);
     }
-//
-//    public void deleteLastRowById() {
-//        WebElement lastRow = tableRows.getLast();
-//        WebElement idCell = lastRow.findElement(By.cssSelector("td:nth-child(4)"));
-//        service.deleteCapybaraById(Long.valueOf(idCell.getText())); //Long.valueOf(idCell.getText()) = 4
-//    }
 }
 
 

@@ -96,8 +96,7 @@ public class MyRestService {
     }
 
     public void deleteCapybaraById(Long id) {
-        //sout: id = 4
-        if (repository.findById(id).isEmpty()) { //goes here?
+        if (repository.findById(id).isEmpty()) {
             throw new CapybaraNotFoundException();
         }
         repository.deleteById(id);

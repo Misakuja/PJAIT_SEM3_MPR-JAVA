@@ -4,38 +4,29 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import pl.edu.pjatk.MPR_Project.service.MyRestService;
 
-public class AddCapybaraFormPage {
+public class FindCapybaraByNameFormPage {
     private final WebDriver driver;
 
     @FindBy(id = "name")
     private WebElement nameInput;
 
-    @FindBy(id = "age")
-    private WebElement ageInput;
-
     @FindBy(id = "submit")
     private WebElement submitInput;
 
-    public AddCapybaraFormPage(WebDriver driver) {
+    public FindCapybaraByNameFormPage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
     }
 
-    public AddCapybaraFormPage open() {
-        this.driver.get("http://localhost:8081/form/add");
+    public FindCapybaraByNameFormPage open() {
+        this.driver.get("http://localhost:8081/form/find/byName");
         return this;
     }
 
-    public AddCapybaraFormPage fillInNameInput(String text) {
+    public FindCapybaraByNameFormPage fillInNameInput(String text) {
+        this.nameInput.clear();
         this.nameInput.sendKeys(text);
-        return this;
-    }
-
-    public AddCapybaraFormPage fillInAgeInput(String text) {
-        this.ageInput.clear();
-        this.ageInput.sendKeys(text);
         return this;
     }
 
@@ -43,5 +34,4 @@ public class AddCapybaraFormPage {
         this.submitInput.click();
         return new DisplayCapybaraListPage(driver);
     }
-
 }
