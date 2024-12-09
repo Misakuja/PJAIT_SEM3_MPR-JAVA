@@ -4,7 +4,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import pl.edu.pjatk.MPR_Project.service.MyRestService;
 
 public class AddCapybaraFormPage {
     private final WebDriver driver;
