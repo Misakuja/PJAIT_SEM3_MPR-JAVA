@@ -42,7 +42,7 @@ public class MyRestServiceTest {
     private MyRestService myRestService;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         this.capybaraRepository = mock(CapybaraRepository.class);
         this.contentStream = mock(PDPageContentStream.class);
         this.document = mock(PDDocument.class);
