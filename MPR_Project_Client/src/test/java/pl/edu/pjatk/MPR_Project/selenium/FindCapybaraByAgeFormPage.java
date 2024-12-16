@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,7 +21,7 @@ public class FindCapybaraByAgeFormPage {
     }
 
     public FindCapybaraByAgeFormPage open() {
-        this.driver.get("http://localhost:8081/form/find/byAge");
+        this.driver.get("http://localhost:8082/form/find/byAge");
         return this;
     }
 

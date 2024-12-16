@@ -1,15 +1,15 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClient;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,13 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class FindCapybaraByAgeFormTest {
     WebDriver driver;
-
-    @Autowired
-    private CapybaraRepository capybaraRepository;
+    private RestClient restClient;
 
     @BeforeEach
     public void setUp() {
         this.driver = new ChromeDriver();
+        this.restClient = RestClient.create("http://localhost:8082");
     }
 
     @AfterEach
@@ -33,11 +32,16 @@ public class FindCapybaraByAgeFormTest {
 
     @Test
     public void findCapybaraByAgeFormTest() {
-        Capybara capybara = new Capybara("test", 5);
-        capybara.setIdentification();
-        Capybara savedCapybara = capybaraRepository.save(capybara);
+        Capybara capybara = new Capybara("TEST", 5);
 
-        String AgeInputText = String.valueOf(savedCapybara.getId());
+        restClient.post()
+                .uri("/capybara/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(capybara)
+                .retrieve()
+                .toBodilessEntity();
+
+        String AgeInputText = String.valueOf(capybara.getId());
 
         FindCapybaraByAgeFormPage findCapybaraByAgeFormPage = new FindCapybaraByAgeFormPage(driver)
                 .open()

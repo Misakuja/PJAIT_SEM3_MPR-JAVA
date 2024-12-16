@@ -23,7 +23,7 @@ public class MyRestController {
         this.myRestService = myRestService;
     }
 
-    @GetMapping("capybara/get/all")
+    @GetMapping("/")
     public ResponseEntity<List<Capybara>> getAll() {
         return new ResponseEntity<>(this.myRestService.getAllCapybaraObjects(), HttpStatus.OK);
     }

@@ -1,16 +1,16 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClient;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
-import pl.edu.pjatk.MPR_Project.selenium.DisplayCapybaraListPage;
+
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,13 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class UpdateCapybaraFormTest {
     WebDriver driver;
-
-    @Autowired
-    private CapybaraRepository capybaraRepository;
+    RestClient restClient;
 
     @BeforeEach
     public void setUp() {
         this.driver = new ChromeDriver();
+        this.restClient = RestClient.create("http://localhost:8082");
     }
 
     @AfterEach
@@ -34,11 +33,16 @@ public class UpdateCapybaraFormTest {
 
     @Test
     public void updateCapybaraFormTest() {
-        Capybara capybara = new Capybara("test", 5);
-        capybara.setIdentification();
-        Capybara savedCapybara = capybaraRepository.save(capybara);
+        Capybara capybara = new Capybara("TEST", 5);
 
-        String idInputText = String.valueOf(savedCapybara.getId());
+        restClient.post()
+                .uri("/capybara/add")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(capybara)
+                .retrieve()
+                .toBodilessEntity();
+
+        String idInputText = String.valueOf(capybara.getId());
         UpdateCapybaraFormPage updateCapybaraFormPage = new UpdateCapybaraFormPage(driver)
                 .open()
                 .fillInIdInput(idInputText)
