@@ -23,15 +23,15 @@ public class DeleteCapybaraFormTest {
         this.driver = new ChromeDriver();
         this.restClient = RestClient.create("http://localhost:8082");
     }
-
-    @AfterEach
-    public void tearDown() {
-        this.driver.close();
-    }
+//
+//    @AfterEach
+//    public void tearDown() {
+//        this.driver.close();
+//    }
 
     @Test
     public void deleteCapybaraFormTest() {
-        Capybara capybara = new Capybara("TEST", 5);
+        Capybara capybara = new Capybara("TEST2", 5);
 
         restClient.post()
                 .uri("/capybara/add")

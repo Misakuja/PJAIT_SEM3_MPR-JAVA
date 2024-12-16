@@ -1,58 +1,59 @@
-//package test.java.pl.edu.pjatk.MPR_Project;
-//
-//import jakarta.servlet.http.HttpServletResponse;
-//import org.apache.pdfbox.pdmodel.PDPageContentStream;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.web.client.RestClient;
-//import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
-//import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
-//import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
-//import pl.edu.pjatk.MPR_Project.model.Capybara;
-//import pl.edu.pjatk.MPR_Project.service.MyRestService;
-//import pl.edu.pjatk.MPR_Project.service.StringService;
-//
-//import java.io.IOException;
-//import java.lang.reflect.Field;
-//import java.util.ArrayList;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.Mockito.*;
-//
-//@SpringBootTest
-//public class MyRestServiceTest {
-//
-//    @Mock
-//    private StringService stringService;
-//
-//    @Mock
-//    private RestClient restClient;
-//
-//    @InjectMocks
-//    private MyRestService myRestService;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        this.capybaraRepository = mock(CapybaraRepository.class);
-//        this.stringService = mock(StringService.class);
-//        this.myRestService = new MyRestService(capybaraRepository, stringService);
-//    }
-//
-//    @Test
-//    public void setIdentificationTest() {
-//        Capybara capybara = new Capybara("Test", 2);
-//
-//        capybara.setIdentification();
-//
-//        assertEquals(102, capybara.getIdentification());
-//    }
-//
+package test.java.pl.edu.pjatk.MPR_Project;
+
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.MockServerRestClientCustomizer;
+import org.springframework.web.client.RestClient;
+import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
+import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
+import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
+import pl.edu.pjatk.MPR_Project.model.Capybara;
+import pl.edu.pjatk.MPR_Project.service.MyRestService;
+import pl.edu.pjatk.MPR_Project.service.StringService;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@SpringBootTest
+@RestClientTest
+public class MyRestServiceTest {
+
+    MockServerRestClientCustomizer customizer = new MockServerRestClientCustomizer();
+    RestClient.Builder builder = RestClient.builder();
+
+    private MyRestService myRestService;
+    @Mock
+    private StringService stringService;
+
+    @BeforeEach
+    public void setUp() {
+        customizer.customize(builder);
+        myRestService = new MyRestService(stringService, builder.build());
+    }
+
+
+    @Test
+    public void setIdentificationTest() {
+        Capybara capybara = new Capybara("Test", 2);
+
+        capybara.setIdentification();
+
+        assertEquals(102, capybara.getIdentification());
+    }
+
 //    @Test
 //    public void getCapybaraByIdTest() {
 //        Capybara repoCapybara = new Capybara("TEST", 2);
@@ -298,6 +299,6 @@
 //
 //        assertThrows(RuntimeException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
 //    }
-//
-//}
-//
+
+}
+

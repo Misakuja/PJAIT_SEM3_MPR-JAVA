@@ -9,43 +9,21 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
-import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.List;
 
 @Service
 public class MyRestService {
     private final StringService stringService;
-    private static final List<Field> CAPYBARA_FIELDS;
-    private final RestClient restClient;
-
-    static {
-        CAPYBARA_FIELDS = List.of(Capybara.class.getDeclaredFields());
-        CAPYBARA_FIELDS.forEach(field -> field.setAccessible(true));
-    }
+    RestClient restClient;
 
     @Autowired
-    public MyRestService(StringService stringService) {
+    public MyRestService(StringService stringService, RestClient restClient) {
         this.stringService = stringService;
-        this.restClient = RestClient.builder()
-                .baseUrl("http://localhost:8081")
-                .defaultStatusHandler(
-                        HttpStatusCode::is4xxClientError,
-                        (request, response) -> {
-                            HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
-                            switch (status) {
-                                case CONFLICT -> throw new CapybaraAlreadyExists();
-                                case NOT_FOUND -> throw new CapybaraNotFoundException();
-                                case BAD_REQUEST -> throw new InvalidInputCapybaraException();
-                            }
-                        }
-                )
-                .build();
+        this.restClient = restClient;
     }
 
     public void addCapybara(Capybara capybara) {

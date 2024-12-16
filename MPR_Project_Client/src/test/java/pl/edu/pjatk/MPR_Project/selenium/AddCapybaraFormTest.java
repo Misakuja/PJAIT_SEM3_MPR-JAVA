@@ -1,5 +1,6 @@
 package pl.edu.pjatk.MPR_Project.selenium;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("test")
+
 public class AddCapybaraFormTest {
     private WebDriver driver;
 
@@ -19,10 +21,10 @@ public class AddCapybaraFormTest {
         this.driver = new ChromeDriver();
     }
 
-//    @AfterEach
-//    public void tearDown() {
-//        this.driver.close();
-//    }
+    @AfterEach
+    public void tearDown() {
+        this.driver.close();
+    }
 
     @Test
     public void addCapybaraFormTest() {

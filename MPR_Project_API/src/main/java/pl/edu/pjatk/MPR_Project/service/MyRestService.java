@@ -26,12 +26,6 @@ public class MyRestService {
     private final CapybaraRepository capybaraRepository;
     private final CapybaraRepository repository;
     private final StringService stringService;
-    private static final List<Field> CAPYBARA_FIELDS;
-
-    static {
-        CAPYBARA_FIELDS = List.of(Capybara.class.getDeclaredFields());
-        CAPYBARA_FIELDS.forEach(field -> field.setAccessible(true));
-    }
 
     @Autowired
     public MyRestService(CapybaraRepository repository, StringService stringService) {
