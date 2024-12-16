@@ -23,7 +23,7 @@ public class AddCapybaraFormPage {
     }
 
     public AddCapybaraFormPage open() {
-        this.driver.get("http://localhost:8082/form/add");
+        this.driver.get("http://localhost:8081/form/add");
         return this;
     }
 

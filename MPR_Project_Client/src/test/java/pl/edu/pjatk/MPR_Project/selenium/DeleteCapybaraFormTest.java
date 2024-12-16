@@ -1,6 +1,5 @@
 package pl.edu.pjatk.MPR_Project.selenium;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
@@ -21,7 +20,7 @@ public class DeleteCapybaraFormTest {
     @BeforeEach
     public void setUp() {
         this.driver = new ChromeDriver();
-        this.restClient = RestClient.create("http://localhost:8082");
+        this.restClient = RestClient.create("http://localhost:8081");
     }
 //
 //    @AfterEach
@@ -34,7 +33,7 @@ public class DeleteCapybaraFormTest {
         Capybara capybara = new Capybara("TEST2", 5);
 
         restClient.post()
-                .uri("/capybara/add")
+                .uri("http://localhost:8081/capybara/add")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(capybara)
                 .retrieve()

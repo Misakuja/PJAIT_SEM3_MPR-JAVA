@@ -4,7 +4,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import pl.edu.pjatk.MPR_Project.selenium.DisplayCapybaraListPage;
 
 public class DeleteCapybaraFormPage {
     private final WebDriver driver;
@@ -21,7 +20,7 @@ public class DeleteCapybaraFormPage {
     }
 
     public DeleteCapybaraFormPage open() {
-        this.driver.get("http://localhost:8082/form/delete");
+        this.driver.get("http://localhost:8081/form/delete");
         return this;
     }
 

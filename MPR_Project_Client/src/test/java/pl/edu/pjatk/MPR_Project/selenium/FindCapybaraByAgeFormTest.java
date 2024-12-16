@@ -22,7 +22,7 @@ public class FindCapybaraByAgeFormTest {
     @BeforeEach
     public void setUp() {
         this.driver = new ChromeDriver();
-        this.restClient = RestClient.create("http://localhost:8082");
+        this.restClient = RestClient.create("http://localhost:8081");
     }
 
     @AfterEach

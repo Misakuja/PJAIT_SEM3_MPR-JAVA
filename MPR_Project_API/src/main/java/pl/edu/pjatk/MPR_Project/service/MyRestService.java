@@ -13,7 +13,6 @@ import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
-import pl.edu.pjatk.MPR_Project.service.StringService;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -31,7 +30,6 @@ public class MyRestService {
     public MyRestService(CapybaraRepository repository, StringService stringService) {
         this.repository = repository;
         this.stringService = stringService;
-
 
         Capybara capy1 = new Capybara("CAPY1", 2);
         Capybara capy2 = new Capybara("CAPY2", 3);
