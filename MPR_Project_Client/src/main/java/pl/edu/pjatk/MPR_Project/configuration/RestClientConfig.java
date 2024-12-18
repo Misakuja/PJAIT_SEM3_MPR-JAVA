@@ -13,7 +13,7 @@ import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 @Configuration
 public class RestClientConfig {
     @Bean
-    public RestClient restClient() {
+    public RestClient getRestClient() {
         return RestClient.builder()
                 .baseUrl("http://localhost:8082/server")
                 .defaultStatusHandler(

@@ -27,7 +27,7 @@ public class UpdateCapybaraFormPage {
     }
 
     public UpdateCapybaraFormPage open() {
-        this.driver.get("http://localhost:8082/form/update");
+        this.driver.get("http://localhost:8083/client/form/update");
         return this;
     }
 

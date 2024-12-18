@@ -25,7 +25,7 @@ public class DisplayCapybaraListPage {
     }
 
     public DisplayCapybaraListPage open() {
-        this.driver.get("http://localhost:8081/");
+        this.driver.get("http://localhost:8083/client/");
         return this;
     }
 

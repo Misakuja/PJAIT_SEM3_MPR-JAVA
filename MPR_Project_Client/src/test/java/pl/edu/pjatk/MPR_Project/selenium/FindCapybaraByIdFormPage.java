@@ -20,7 +20,7 @@ public class FindCapybaraByIdFormPage {
     }
 
     public FindCapybaraByIdFormPage open() {
-        this.driver.get("http://localhost:8082/form/find/byId");
+        this.driver.get("http://localhost:8083/client/form/find/byId");
         return this;
     }
 

@@ -20,7 +20,7 @@ public class FindCapybaraByIdForPdfFormPage {
     }
 
     public FindCapybaraByIdForPdfFormPage open() {
-        this.driver.get("http://localhost:8082/form/find/showPdf");
+        this.driver.get("http://localhost:8083/client/form/find/showPdf");
         return this;
     }
 
