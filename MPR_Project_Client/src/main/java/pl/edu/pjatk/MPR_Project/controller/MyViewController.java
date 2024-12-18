@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 @Controller
+@RequestMapping("/client/")
 public class MyViewController {
     private final MyRestService service;
 
@@ -21,7 +22,7 @@ public class MyViewController {
     }
 
     //Get all
-    @GetMapping("/")
+    @GetMapping("")
     public String viewAll(Model model) {
         model.addAttribute("capybaras", service.getAllCapybaraObjects());
         return "displayCapybaraList";
@@ -37,7 +38,7 @@ public class MyViewController {
     @PostMapping("form/add")
     public String submitAddForm(@ModelAttribute Capybara newCapybara) {
         this.service.addCapybara(newCapybara);
-        return "redirect:/";
+        return "redirect:/client/";
     }
 
     //delete
@@ -51,7 +52,7 @@ public class MyViewController {
     public String submitDeleteForm(Capybara capybara) {
         Long inputId = capybara.getId();
         this.service.deleteCapybaraById(inputId);
-        return "redirect:/";
+        return "redirect:/client/";
     }
 
     //patch
@@ -66,7 +67,7 @@ public class MyViewController {
         Long id = capybara.getId();
 
         this.service.patchCapybaraById(capybara, id);
-        return "redirect:/";
+        return "redirect:/client/";
     }
 
     //find by id

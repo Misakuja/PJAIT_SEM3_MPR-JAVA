@@ -15,7 +15,7 @@ public class RestClientConfig {
     @Bean
     public RestClient restClient() {
         return RestClient.builder()
-                .baseUrl("http://localhost:8082")
+                .baseUrl("http://localhost:8082/server")
                 .defaultStatusHandler(
                         status -> status.is4xxClientError(),
                         (request, response) -> {

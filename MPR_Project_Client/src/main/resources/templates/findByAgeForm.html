@@ -9,12 +9,12 @@
 <h1>Find Capybara By Age</h1>
 <div class="box">
 
-    <form action="#" th:action="@{/form/find/byAge}" th:object="${capybara}" method="POST">
+    <form action="#" th:action="@{/client/form/find/byAge}" th:object="${capybara}" method="POST">
         <label for="age">Age:</label>
         <input type="number" id="age" name="age" th:field="*{age}"/>
         <input type="submit" id="submit" value="Submit">
     </form>
-    <button onclick="location.href = '/'">Go back</button>
+    <button onclick="location.href = '/client/'">Go back</button>
 </div>
 </body>
 </html>
