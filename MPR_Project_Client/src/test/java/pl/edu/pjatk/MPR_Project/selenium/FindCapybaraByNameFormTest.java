@@ -7,11 +7,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestClient;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.service.StringService;
+import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,15 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class FindCapybaraByNameFormTest {
     WebDriver driver;
-    private RestClient restClient;
 
     @Autowired
-    private StringService stringService;
+    CapybaraRepository capybaraRepository;
 
     @BeforeEach
     public void setUp() {
         this.driver = new ChromeDriver();
-        this.restClient = RestClient.create("http://localhost:8082");
     }
 
     @AfterEach
@@ -38,15 +34,9 @@ public class FindCapybaraByNameFormTest {
     @Test
     public void findCapybaraByNameFormTest() {
         Capybara capybara = new Capybara("test", 5);
-
-        restClient.post()
-                .uri("/capybara/add")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(capybara)
-                .retrieve()
-                .toBodilessEntity();
-
-        String nameInputText = capybara.getName();
+        capybara.setIdentification();
+        Capybara savedCapybara = capybaraRepository.save(capybara);
+        String nameInputText = savedCapybara.getName();
         FindCapybaraByNameFormPage findCapybaraByNameFormPage = new FindCapybaraByNameFormPage(driver)
                 .open()
                 .fillInNameInput(nameInputText);

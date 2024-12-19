@@ -21,7 +21,7 @@ public class FindCapybaraByAgeFormPage {
     }
 
     public FindCapybaraByAgeFormPage open() {
-        this.driver.get("http://localhost:8081/form/find/byAge");
+        this.driver.get("http://localhost:8083/client/form/find/byAge");
         return this;
     }
 

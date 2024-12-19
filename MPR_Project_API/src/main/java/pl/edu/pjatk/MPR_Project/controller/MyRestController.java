@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 @RestController
+@RequestMapping("/server/")
 public class MyRestController {
     private final MyRestService myRestService;
     private static final Logger logger = LoggerFactory.getLogger(MyRestController.class);
@@ -27,7 +28,7 @@ public class MyRestController {
         this.myRestService = myRestService;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<List<Capybara>> getAll() {
         logger.info("Received request to get all capybaras");
         return new ResponseEntity<>(this.myRestService.getAllCapybaraObjects(), HttpStatus.OK);
