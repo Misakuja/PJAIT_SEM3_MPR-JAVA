@@ -36,12 +36,6 @@ public class DisplayCapybaraListPage {
     public boolean areButtonsVisible() {
         return buttonContainer.isDisplayed();
     }
-
-    public boolean isLastRowContentCorrect(String name, String age) {
-        WebElement lastRow = tableRows.getLast();
-        String rowText = lastRow.getText();
-        return rowText.contains(name) && rowText.contains(age);
-    }
 }
 
 

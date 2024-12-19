@@ -11,6 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 
@@ -33,11 +34,6 @@ public class MyRestService {
     public void addCapybara(Capybara capybara) {
         logger.info("Attempting to add capybara with values: {}", capybara);
 
-        restClient.get()
-                .uri("/capybara/find/id/{id}", capybara.getId())
-                .retrieve()
-                .toEntity(Capybara.class);
-
         try {
             restClient.post()
                     .uri("/capybara/add")
@@ -54,11 +50,6 @@ public class MyRestService {
 
     public void patchCapybaraById(Capybara capybara, Long id) {
         logger.info("Attempting to update capybara with ID: {} with values: {}", id, capybara);
-
-        restClient.get()
-                .uri("/capybara/find/id/{id}", id)
-                .retrieve()
-                .toEntity(Capybara.class);
 
         if (capybara.getName().isBlank() || capybara.getAge() <= 0) {
             logger.error("Invalid Input. Failed.");
@@ -78,11 +69,6 @@ public class MyRestService {
 
     public void deleteCapybaraById(Long id) {
         logger.info("Attempting to delete capybara with ID: {}", id);
-
-        restClient.get()
-                .uri("/capybara/find/id/{id}", id)
-                .retrieve()
-                .toEntity(Capybara.class);
 
         try {
             restClient.delete()
@@ -154,6 +140,12 @@ public class MyRestService {
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {
                     });
+
+            assert capybaraList != null;
+            if (capybaraList.isEmpty()) {
+                throw new CapybaraNotFoundException();
+            }
+
             logger.info("Successfully got all capybaras");
             return capybaraList;
         } catch (Exception e) {

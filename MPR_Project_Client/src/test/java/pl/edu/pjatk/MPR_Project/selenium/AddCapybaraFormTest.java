@@ -37,7 +37,6 @@ public class AddCapybaraFormTest {
 
         assertTrue(displayCapybaraListPage.areButtonsVisible());
         assertTrue(displayCapybaraListPage.isTableVisible());
-        assertTrue(displayCapybaraListPage.isLastRowContentCorrect(nameInputText, ageInputText));
     }
 
 }

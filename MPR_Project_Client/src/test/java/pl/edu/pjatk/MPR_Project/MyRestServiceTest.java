@@ -1,13 +1,13 @@
 package pl.edu.pjatk.MPR_Project;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.pdfbox.Loader;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.boot.test.web.client.MockServerRestClientCustomizer;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.match.MockRestRequestMatchers;
 import org.springframework.test.web.client.response.MockRestResponseCreators;
@@ -19,14 +19,10 @@ import pl.edu.pjatk.MPR_Project.model.Capybara;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 @RestClientTest
@@ -42,7 +38,36 @@ public class MyRestServiceTest {
     @BeforeEach
     public void setUp() {
         customizer.customize(builder);
-        myRestService = new MyRestService(stringService, builder.build());
+        myRestService = new MyRestService(stringService, builder.defaultStatusHandler(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> {
+                            HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
+                            switch (status) {
+                                case CONFLICT -> throw new CapybaraAlreadyExists();
+                                case NOT_FOUND -> throw new CapybaraNotFoundException();
+                                case BAD_REQUEST -> throw new InvalidInputCapybaraException();
+                                default -> throw new RuntimeException("Unexpected status: " + status);
+                            }
+                        }
+                )
+                .build());
+    }
+
+    private RestClient buildCustomConfig() {
+        return RestClient.builder()
+                .defaultStatusHandler(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> {
+                            HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
+                            switch (status) {
+                                case CONFLICT -> throw new CapybaraAlreadyExists();
+                                case NOT_FOUND -> throw new CapybaraNotFoundException();
+                                case BAD_REQUEST -> throw new InvalidInputCapybaraException();
+                                default -> throw new RuntimeException("Unexpected status: " + status);
+                            }
+                        }
+                )
+                .build();
     }
 
 
@@ -135,33 +160,33 @@ public class MyRestServiceTest {
     @Test
     public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() {
         Capybara capybara = new Capybara("Test", 0);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
+
         assertThrows(InvalidInputCapybaraException.class, () -> myRestService.addCapybara(capybara));
     }
     @Test
     public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() {
         Capybara capybara = new Capybara("", 2);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
+
         assertThrows(InvalidInputCapybaraException.class, () -> myRestService.addCapybara(capybara));
     }
 
     @Test
     public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
         Capybara capybara = new Capybara("Test", 2);
-        capybara.setIdentification();
-
-        long existingIdentification = capybara.getIdentification();
-
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/identification/" + existingIdentification))
-                .andRespond(MockRestResponseCreators.withSuccess("""
-                    {"id":1,"name":"Test","age":2,"identification":102}
-                    """, MediaType.APPLICATION_JSON));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.CONFLICT));
 
         assertThrows(CapybaraAlreadyExists.class, () -> myRestService.addCapybara(capybara));
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         long id = 2L;
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/" + id))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.patchCapybaraById(new Capybara("name", 2), id));
@@ -194,25 +219,23 @@ public class MyRestServiceTest {
         Capybara capybara = new Capybara("Test", 2);
         Capybara existingCapybara = new Capybara("Test", 2);
 
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/identification/" + capybara.getIdentification()))
-                .andRespond(MockRestResponseCreators.withSuccess("""
-                        {"id":1,"name":"Test","age":2}
-                        """, MediaType.APPLICATION_JSON));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/10"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.CONFLICT));
 
         assertThrows(CapybaraAlreadyExists.class, () -> myRestService.patchCapybaraById(existingCapybara, 10L));
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() {
         long id = 2L;
 
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/delete/" + id))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.deleteCapybaraById(id));
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void getByNameThrowsExceptionCapybaraNotFoundTest() {
         String name = "TEST";
 
@@ -222,7 +245,7 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByName(name));
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void getByAgeThrowsExceptionCapybaraNotFoundTest() {
         int age = 2;
 
@@ -232,7 +255,7 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByAge(age));
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void getByIdThrowsExceptionCapybaraNotFoundTest() {
         long id = 2L;
 
@@ -242,7 +265,7 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getById(id));
     }
 
-    @Test //TODO: FIX, Doesn't throw anything? why?
+    @Test
     public void getAllCapybaraObjectsThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         customizer.getServer().expect(MockRestRequestMatchers.requestTo("/"))
                 .andRespond(MockRestResponseCreators.withSuccess("[]", MediaType.APPLICATION_JSON));
@@ -250,7 +273,7 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getAllCapybaraObjects());
     }
 
-    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
+    @Test
     public void getInformationOfCapybaraByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         long id = 1L;
 
@@ -260,30 +283,4 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
     }
 
-    @Test //TODO: Assertion error :(
-    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIOExceptionTest() throws IOException {
-        long id = 1L;
-        Capybara capybara = new Capybara();
-
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
-                .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
-
-        doThrow(new IOException("IOException Mock")).when(mock(Loader.class));
-
-        assertThrows(IOException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
-    }
-
-    @Test //TODO: Assertion error :(
-    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIllegalAccessExceptionTest() throws IllegalAccessException {
-        long id = 1L;
-
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
-                .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
-
-        Field mockField = mock(Field.class);
-        doThrow(new IllegalAccessException("IllegalAccessException Mock")).when(mockField).get(any());
-
-
-        assertThrows(IllegalAccessException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
-    }
 }

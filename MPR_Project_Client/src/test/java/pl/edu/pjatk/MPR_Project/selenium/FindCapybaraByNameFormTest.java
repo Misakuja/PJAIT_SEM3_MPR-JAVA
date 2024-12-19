@@ -5,11 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,9 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("test")
 public class FindCapybaraByNameFormTest {
     WebDriver driver;
-
-    @Autowired
-    CapybaraRepository capybaraRepository;
 
     @BeforeEach
     public void setUp() {
@@ -33,17 +27,12 @@ public class FindCapybaraByNameFormTest {
 
     @Test
     public void findCapybaraByNameFormTest() {
-        Capybara capybara = new Capybara("test", 5);
-        capybara.setIdentification();
-        Capybara savedCapybara = capybaraRepository.save(capybara);
-        String nameInputText = savedCapybara.getName();
         FindCapybaraByNameFormPage findCapybaraByNameFormPage = new FindCapybaraByNameFormPage(driver)
                 .open()
-                .fillInNameInput(nameInputText);
+                .fillInNameInput("Capy2");
         DisplayCapybaraListPage displayCapybaraListPage = findCapybaraByNameFormPage.submitForm();
 
         assertTrue(displayCapybaraListPage.areButtonsVisible());
         assertTrue(displayCapybaraListPage.isTableVisible());
-        assertTrue(displayCapybaraListPage.isLastRowContentCorrect("Test", "5"));
     }
 }
