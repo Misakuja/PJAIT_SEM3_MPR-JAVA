@@ -158,10 +158,10 @@ public class MyRestServiceTest {
         assertThrows(CapybaraAlreadyExists.class, () -> myRestService.addCapybara(capybara));
     }
 
-    @Test //TODO: AssertionError instead of capy not found
+    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
     public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         long id = 2L;
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.patchCapybaraById(new Capybara("name", 2), id));
@@ -250,11 +250,11 @@ public class MyRestServiceTest {
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getAllCapybaraObjects());
     }
 
-    @Test //TODO: AssertionError instead of capy not found
+    @Test //TODO: FIX HTTP CLIENT NOT_FOUND INSTEAD OF CAPYBARA NOT FOUND
     public void getInformationOfCapybaraByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         long id = 1L;
 
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
                 .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
@@ -265,7 +265,7 @@ public class MyRestServiceTest {
         long id = 1L;
         Capybara capybara = new Capybara();
 
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
                 .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
 
         doThrow(new IOException("IOException Mock")).when(mock(Loader.class));
@@ -277,7 +277,7 @@ public class MyRestServiceTest {
     public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIllegalAccessExceptionTest() throws IllegalAccessException {
         long id = 1L;
 
-        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
                 .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
 
         Field mockField = mock(Field.class);
