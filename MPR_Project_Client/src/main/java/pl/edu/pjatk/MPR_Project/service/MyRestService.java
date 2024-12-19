@@ -1,7 +1,6 @@
 package pl.edu.pjatk.MPR_Project.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -9,17 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
-import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 
-
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -38,15 +33,10 @@ public class MyRestService {
     public void addCapybara(Capybara capybara) {
         logger.info("Attempting to add capybara with values: {}", capybara);
 
-        Optional<Capybara> existingCapybara = restClient.get()
-                .uri("/capybara/find/identification/" + capybara.getIdentification())
+        restClient.get()
+                .uri("/capybara/find/id/{id}", capybara.getId())
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
-
-        if (existingCapybara.isPresent()) {
-            throw new CapybaraAlreadyExists();
-        }
+                .toEntity(Capybara.class);
 
         try {
             restClient.post()
@@ -65,15 +55,10 @@ public class MyRestService {
     public void patchCapybaraById(Capybara capybara, Long id) {
         logger.info("Attempting to update capybara with ID: {} with values: {}", id, capybara);
 
-        Optional<Capybara> existingCapybara = restClient.get()
-                .uri("/capybara/find/identification/" + capybara.getIdentification())
+        restClient.get()
+                .uri("/capybara/find/id/{id}", id)
                 .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
-
-        if (existingCapybara.isPresent()) {
-            throw new CapybaraAlreadyExists();
-        }
+                .toEntity(Capybara.class);
 
         if (capybara.getName().isBlank() || capybara.getAge() <= 0) {
             logger.error("Invalid Input. Failed.");
@@ -94,15 +79,10 @@ public class MyRestService {
     public void deleteCapybaraById(Long id) {
         logger.info("Attempting to delete capybara with ID: {}", id);
 
-        ResponseEntity<Capybara> response = restClient.get()
+        restClient.get()
                 .uri("/capybara/find/id/{id}", id)
                 .retrieve()
                 .toEntity(Capybara.class);
-
-        if(response.getStatusCode() == HttpStatus.NOT_FOUND) {
-            logger.error("Failed to delete capybara. Capybara not found");
-            throw new CapybaraNotFoundException();
-        }
 
         try {
             restClient.delete()
@@ -119,16 +99,6 @@ public class MyRestService {
     public List<Capybara> getByName(String name) {
         logger.info("Attempting to get capybara with name: {}", name);
 
-        ResponseEntity<Capybara> response = restClient.get()
-                .uri("/capybara/find/name/{name}", name)
-                .retrieve()
-                .toEntity(Capybara.class);
-
-        if(response.getStatusCode() == HttpStatus.NOT_FOUND) {
-            logger.error("Failed to get capybara by name. Capybara not found");
-            throw new CapybaraNotFoundException();
-        }
-
         try {
             List<Capybara> capybaraList = restClient.get()
                     .uri("/capybara/find/name/{name}", name)
@@ -144,6 +114,7 @@ public class MyRestService {
 
     public List<Capybara> getByAge(int age) {
         logger.info("Attempting to get capybara with age: {}", age);
+
         try {
             List<Capybara> capybaraList = restClient.get()
                     .uri("/capybara/find/age/{age}", age)
@@ -176,6 +147,7 @@ public class MyRestService {
 
     public List<Capybara> getAllCapybaraObjects() {
         logger.info("Attempting to get all capybaras");
+
         try {
             List<Capybara> capybaraList = restClient.get()
                     .uri("/")
