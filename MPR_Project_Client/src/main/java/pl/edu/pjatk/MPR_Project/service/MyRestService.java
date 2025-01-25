@@ -1,165 +1,176 @@
 package pl.edu.pjatk.MPR_Project.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class MyRestService {
     private final StringService stringService;
-    private static final List<Field> CAPYBARA_FIELDS;
-    private final RestClient restClient;
-
-    static {
-        CAPYBARA_FIELDS = List.of(Capybara.class.getDeclaredFields());
-        CAPYBARA_FIELDS.forEach(field -> field.setAccessible(true));
-    }
+    private static final Logger logger = LoggerFactory.getLogger(MyRestService.class);
 
     @Autowired
-    public MyRestService(StringService stringService) {
+    RestClient restClient;
+
+    public MyRestService(StringService stringService, RestClient restClient) {
         this.stringService = stringService;
-        this.restClient = RestClient.create("http://localhost:8082/");
+        this.restClient = restClient;
     }
 
     public void addCapybara(Capybara capybara) {
+        logger.info("Attempting to add capybara with values: {}", capybara);
 
-        if(capybara.getName().isBlank() || capybara.getAge() == 0) {
+        try {
+            restClient.post()
+                    .uri("/capybara/add")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(capybara)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.error("Failed to add capybara. {}", String.valueOf(e));
+            throw e;
+        }
+        logger.info("Successfully added capybara with values: {}", capybara);
+    }
+
+    public void patchCapybaraById(Capybara capybara, Long id) {
+        logger.info("Attempting to update capybara with ID: {} with values: {}", id, capybara);
+
+        if (capybara.getName().isBlank() || capybara.getAge() <= 0) {
+            logger.error("Invalid Input. Failed.");
             throw new InvalidInputCapybaraException();
         }
-
-//        if(capybaraRepository.findByIdentification(identification).isPresent()) {
-//            throw new CapybaraAlreadyExists();
-//        }
-
-        ResponseEntity<Void> response = restClient.post()
-                .uri("/form/add")
-                .body(capybara)
-                .retrieve()
-                .toBodilessEntity();
+        try {
+            restClient.patch()
+                    .uri("/capybara/patch/{id}", id)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.error("Failed to patch capybara. {}", String.valueOf(e));
+            throw e;
+        }
+        logger.info("Successfully updated capybara with ID: {} with values: {}", id, capybara);
     }
 
-    public void patchCapybaraById(Capybara capybara, Long id) { //todo
-        Optional<Capybara> capybaraToReplaceOptional = repository.findById(id);
+    public void deleteCapybaraById(Long id) {
+        logger.info("Attempting to delete capybara with ID: {}", id);
 
-        if (capybaraToReplaceOptional.isEmpty()) {
-            throw new CapybaraNotFoundException();
+        try {
+            restClient.delete()
+                    .uri("/capybara/delete/{id}", id)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            logger.error("Failed to delete capybara. {}", String.valueOf(e));
+            throw e;
         }
-        if(capybara.getName().isBlank() || capybara.getAge() <= 0) {
-            throw new InvalidInputCapybaraException();
-        }
-
-        Capybara capybaraToReplace = capybaraToReplaceOptional.get();
-
-        capybaraToReplace.setName(stringService.uppercase(capybara.getName()));
-        capybaraToReplace.setAge(capybara.getAge());
-
-        capybaraToReplace.setIdentification();
-
-        long identification = capybaraToReplace.getIdentification();
-        if(capybaraRepository.findByIdentification(identification).isPresent()) {
-            throw new CapybaraAlreadyExists();
-        }
-
-        repository.save(capybaraToReplace);
+        logger.info("Successfully deleted capybara with ID: {}", id);
     }
 
-    public void deleteCapybaraById(Long id) { //todo
-         String result = restClient.get()
-                 .uri("/form/delete")
-                 .retrieve()
-                 .body(String.class);
-//        if (repository.findById(id).isEmpty()) {
-//            throw new CapybaraNotFoundException();
-//        }
-//        repository.deleteById(id);
+    public List<Capybara> getByName(String name) {
+        logger.info("Attempting to get capybara with name: {}", name);
+
+        try {
+            List<Capybara> capybaraList = restClient.get()
+                    .uri("/capybara/find/name/{name}", name)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+            logger.info("Successfully got capybara with name: {}", name);
+            return capybaraList;
+        } catch (Exception e) {
+            logger.error("Failed to get capybara by name. {}", String.valueOf(e));
+            throw e;
+        }
     }
 
-    public List<Capybara> getByName(String name) { //todo
-        List<Capybara> capybaraListToLower = repository.findByName(name.toUpperCase());
-        capybaraListToLower.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
+    public List<Capybara> getByAge(int age) {
+        logger.info("Attempting to get capybara with age: {}", age);
 
-        if (capybaraListToLower.isEmpty()) {
-            throw new CapybaraNotFoundException();
+        try {
+            List<Capybara> capybaraList = restClient.get()
+                    .uri("/capybara/find/age/{age}", age)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            logger.info("Successfully got capybara with age: {}", age);
+            return capybaraList;
+        } catch (Exception e) {
+            logger.error("Failed to get capybara by age. {}", String.valueOf(e));
+            throw e;
         }
-        return capybaraListToLower;
     }
 
-    public List<Capybara> getByAge(int age) { //todo
-        List<Capybara> capybaraListToLower = repository.findByAge(age);
-        capybaraListToLower.forEach(capybara -> capybara.setName(stringService.lowercase(capybara.getName())));
-
-        if (capybaraListToLower.isEmpty()) {
-            throw new CapybaraNotFoundException();
+    public Capybara getById(Long id) {
+        logger.info("Attempting to get capybara with ID: {}", id);
+        try {
+            Capybara capybara = restClient.get()
+                    .uri("/capybara/find/id/{id}", id)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+            logger.info("Successfully got capybara with ID: {}", id);
+            return capybara;
+        } catch (Exception e) {
+            logger.error("Failed to get capybara by ID. {}", String.valueOf(e));
+            throw e;
         }
-        return capybaraListToLower;
-    }
-
-    public Capybara getById(Long id) { //todo
-        Optional<Capybara> capybaraToLower = repository.findById(id);
-
-        if (capybaraToLower.isEmpty()) {
-            throw new CapybaraNotFoundException();
-        }
-        capybaraToLower.get().setName(stringService.lowercase(capybaraToLower.get().getName()));
-
-        return capybaraToLower.get();
     }
 
     public List<Capybara> getAllCapybaraObjects() {
-        return restClient.get()
-                .uri("/")
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
+        logger.info("Attempting to get all capybaras");
+
+        try {
+            List<Capybara> capybaraList = restClient.get()
+                    .uri("/")
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+
+            assert capybaraList != null;
+            if (capybaraList.isEmpty()) {
+                throw new CapybaraNotFoundException();
+            }
+
+            logger.info("Successfully got all capybaras");
+            return capybaraList;
+        } catch (Exception e) {
+            logger.error("Failed to get all capybaras. {}", String.valueOf(e));
+            throw e;
+        }
     }
 
     public PDDocument getInformationOfCapybaraById(Long id, HttpServletResponse response) {
-        Optional<Capybara> capybaraToLower = repository.findById(id);
-        if (capybaraToLower.isEmpty()) {
-            throw new CapybaraNotFoundException();
-        }
-        Capybara capybara = capybaraToLower.get();
+        logger.info("Attempting to get PDF of capybara with ID: {}", id);
+        byte[] pdfBytes = restClient.get()
+                .uri("/capybara/get/information/{id}", id)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .body(byte[].class);
         try {
-            PDDocument document = new PDDocument();
-            PDPage addPage = new PDPage();
-            document.addPage(addPage);
-            PDPage page = document.getPage(0);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-            contentStream.beginText();
-            contentStream.newLineAtOffset(25, 700);
-            contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.TIMES_ROMAN), 12);
-            contentStream.setLeading(14.5f);
-            Class<? extends Capybara> clazz = capybara.getClass();
-            List<Field> fields = new ArrayList<>(List.of(clazz.getDeclaredFields()));
-            for (Field field : fields) {
-                field.setAccessible(true);
-                String fieldText = field.getName().toUpperCase() + ": " + field.get(capybara).toString();
-                contentStream.showText(fieldText);
-                contentStream.newLine();
-            }
-            contentStream.endText();
-            contentStream.close();
-            return document;
-        } catch (IOException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+            assert pdfBytes != null;
+            RandomAccessReadBuffer buffer = new RandomAccessReadBuffer(pdfBytes);
+
+            logger.info("Successfully got capybara PDF");
+            return Loader.loadPDF(buffer);
+
+        } catch (Exception e) {
+            logger.error("Failed to load PDF. {}", String.valueOf(e));
+            throw new RuntimeException("Failed to load PDF", e);
         }
     }
 }

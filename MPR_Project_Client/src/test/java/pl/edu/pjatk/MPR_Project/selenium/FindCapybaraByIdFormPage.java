@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -20,7 +20,7 @@ public class FindCapybaraByIdFormPage {
     }
 
     public FindCapybaraByIdFormPage open() {
-        this.driver.get("http://localhost:8081/form/find/byId");
+        this.driver.get("http://localhost:8083/client/form/find/byId");
         return this;
     }
 

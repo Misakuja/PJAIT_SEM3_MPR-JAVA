@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -27,7 +27,7 @@ public class UpdateCapybaraFormPage {
     }
 
     public UpdateCapybaraFormPage open() {
-        this.driver.get("http://localhost:8081/form/update");
+        this.driver.get("http://localhost:8083/client/form/update");
         return this;
     }
 

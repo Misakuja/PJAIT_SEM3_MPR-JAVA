@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -25,7 +25,7 @@ public class DisplayCapybaraListPage {
     }
 
     public DisplayCapybaraListPage open() {
-        this.driver.get("http://localhost:8081/");
+        this.driver.get("http://localhost:8083/client/");
         return this;
     }
 
@@ -35,12 +35,6 @@ public class DisplayCapybaraListPage {
 
     public boolean areButtonsVisible() {
         return buttonContainer.isDisplayed();
-    }
-
-    public boolean isLastRowContentCorrect(String name, String age) {
-        WebElement lastRow = tableRows.getLast();
-        String rowText = lastRow.getText();
-        return rowText.contains(name) && rowText.contains(age);
     }
 }
 

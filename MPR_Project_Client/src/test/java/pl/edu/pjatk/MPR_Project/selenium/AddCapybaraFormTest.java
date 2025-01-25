@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,7 +7,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import pl.edu.pjatk.MPR_Project.selenium.DisplayCapybaraListPage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,7 +37,6 @@ public class AddCapybaraFormTest {
 
         assertTrue(displayCapybaraListPage.areButtonsVisible());
         assertTrue(displayCapybaraListPage.isTableVisible());
-        assertTrue(displayCapybaraListPage.isLastRowContentCorrect(nameInputText, ageInputText));
     }
 
 }

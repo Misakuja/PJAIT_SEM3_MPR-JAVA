@@ -8,12 +8,12 @@
 <body>
 <h1>Find Capybara By Name</h1>
 <div class="box">
-    <form action="#" th:action="@{/form/find/byName}" th:object="${capybara}" method="POST">
+    <form action="#" th:action="@{/client/form/find/byName}" th:object="${capybara}" method="POST">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" th:field="*{name}"/>
         <input type="submit" id="submit" value="Submit">
     </form>
-    <button onclick="location.href = '/'">Go back</button>
+    <button onclick="location.href = '/client/'">Go back</button>
 </div>
 </body>
 </html>

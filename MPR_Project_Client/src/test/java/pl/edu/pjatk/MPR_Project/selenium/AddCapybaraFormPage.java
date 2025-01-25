@@ -1,10 +1,9 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import pl.edu.pjatk.MPR_Project.selenium.DisplayCapybaraListPage;
 
 public class AddCapybaraFormPage {
     private final WebDriver driver;
@@ -24,7 +23,7 @@ public class AddCapybaraFormPage {
     }
 
     public AddCapybaraFormPage open() {
-        this.driver.get("http://localhost:8081/form/add");
+        this.driver.get("http://localhost:8081/client/form/add");
         return this;
     }
 

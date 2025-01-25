@@ -1,45 +1,75 @@
-package test.java.pl.edu.pjatk.MPR_Project;
+package pl.edu.pjatk.MPR_Project;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
+import org.springframework.boot.test.web.client.MockServerRestClientCustomizer;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.match.MockRestRequestMatchers;
+import org.springframework.test.web.client.response.MockRestResponseCreators;
+import org.springframework.web.client.RestClient;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraAlreadyExists;
 import pl.edu.pjatk.MPR_Project.exception.CapybaraNotFoundException;
 import pl.edu.pjatk.MPR_Project.exception.InvalidInputCapybaraException;
 import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
 import pl.edu.pjatk.MPR_Project.service.MyRestService;
 import pl.edu.pjatk.MPR_Project.service.StringService;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
-@SpringBootTest
+@RestClientTest
 public class MyRestServiceTest {
-    @Mock
-    private CapybaraRepository capybaraRepository;
+
+    MockServerRestClientCustomizer customizer = new MockServerRestClientCustomizer();
+    RestClient.Builder builder = RestClient.builder();
+
+    private MyRestService myRestService;
     @Mock
     private StringService stringService;
-    @InjectMocks
-    private MyRestService myRestService;
 
     @BeforeEach
     public void setUp() {
-        this.capybaraRepository = mock(CapybaraRepository.class);
-        this.stringService = mock(StringService.class);
-        this.myRestService = new MyRestService(capybaraRepository, stringService);
+        customizer.customize(builder);
+        myRestService = new MyRestService(stringService, builder.defaultStatusHandler(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> {
+                            HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
+                            switch (status) {
+                                case CONFLICT -> throw new CapybaraAlreadyExists();
+                                case NOT_FOUND -> throw new CapybaraNotFoundException();
+                                case BAD_REQUEST -> throw new InvalidInputCapybaraException();
+                                default -> throw new RuntimeException("Unexpected status: " + status);
+                            }
+                        }
+                )
+                .build());
     }
+
+    private RestClient buildCustomConfig() {
+        return RestClient.builder()
+                .defaultStatusHandler(
+                        HttpStatusCode::is4xxClientError,
+                        (request, response) -> {
+                            HttpStatus status = HttpStatus.valueOf(response.getStatusCode().value());
+                            switch (status) {
+                                case CONFLICT -> throw new CapybaraAlreadyExists();
+                                case NOT_FOUND -> throw new CapybaraNotFoundException();
+                                case BAD_REQUEST -> throw new InvalidInputCapybaraException();
+                                default -> throw new RuntimeException("Unexpected status: " + status);
+                            }
+                        }
+                )
+                .build();
+    }
+
 
     @Test
     public void setIdentificationTest() {
@@ -52,214 +82,193 @@ public class MyRestServiceTest {
 
     @Test
     public void getCapybaraByIdTest() {
-        Capybara repoCapybara = new Capybara("TEST", 2);
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
-        myRestService.getById(2L);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/1"))
+                .andRespond(MockRestResponseCreators.withSuccess("""
+                        {"id":1,"name":"Test","age":2}
+                        """, MediaType.APPLICATION_JSON));
 
-        verify(capybaraRepository).findById(Long.valueOf(2));
-        verify(stringService).lowercase("TEST");
+        Capybara capybara = myRestService.getById(1L);
+
+        assertEquals("Test", capybara.getName());
+        assertEquals(2, capybara.getAge());
     }
 
     @Test
     public void getCapybaraByAgeTest() {
-        List<Capybara> repoCapybara = new ArrayList<>();
-        repoCapybara.add(new Capybara("TEST", 2));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/age/2"))
+                .andRespond(MockRestResponseCreators.withSuccess("""
+                        [{"id":1,"name":"Test","age":2}]
+                        """, MediaType.APPLICATION_JSON));
 
-        when(capybaraRepository.findByAge(2)).thenReturn(repoCapybara.stream().toList());
-        myRestService.getByAge(2);
+        List<Capybara> capybaraList = myRestService.getByAge(2);
 
-        verify(capybaraRepository).findByAge(2);
-        verify(stringService).lowercase("TEST");
+        assertEquals(1, capybaraList.size());
+        assertEquals("Test", capybaraList.getFirst().getName());
     }
 
     @Test
     public void getCapybaraByNameTest() {
-        List<Capybara> repoCapybara = new ArrayList<>();
-        repoCapybara.add(new Capybara("TEST", 2));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/name/TEST"))
+                .andRespond(MockRestResponseCreators.withSuccess("""
+                        [{"id":1,"name":"TEST","age":2}]
+                        """, MediaType.APPLICATION_JSON));
 
-        when(capybaraRepository.findByName("TEST")).thenReturn(repoCapybara.stream().toList());
-        myRestService.getByName("TEST");
+        List<Capybara> capybaraList = myRestService.getByName("TEST");
 
-        verify(capybaraRepository).findByName("TEST");
-        verify(stringService).lowercase("TEST");
+        assertEquals(1, capybaraList.size());
+        assertEquals("TEST", capybaraList.getFirst().getName());
     }
 
     @Test
     public void deleteCapybaraByIdTest() {
-        Capybara repoCapybara = new Capybara("Test", 2);
-        when(capybaraRepository.findById(any())).thenReturn(Optional.of(repoCapybara));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/delete/1"))
+                .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
 
-        myRestService.deleteCapybaraById(capybaraRepository.findById(Long.valueOf(2)).get().getId());
-
-        verify(capybaraRepository).findById(Long.valueOf(2));
+        myRestService.deleteCapybaraById(1L);
     }
 
     @Test
     public void patchCapybaraByIdTest() {
-        Capybara repoCapybara1 = new Capybara("Test", 2);
-        Capybara repoCapybara2 = new Capybara("TestChanged", 3);
+        Capybara existingCapybara = new Capybara("Test", 2);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/2"))
+                .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
 
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara1));
-        when(stringService.uppercase("TestChanged")).thenReturn("TESTCHANGED");
-
-        myRestService.patchCapybaraById(repoCapybara2, 2L);
-
-        assertEquals(3, repoCapybara1.getAge());
-        assertEquals("TESTCHANGED", repoCapybara1.getName());
-
-        verify(capybaraRepository).findById(Long.valueOf(2));
-        verify(stringService).uppercase("TestChanged");
-        verify(capybaraRepository).save(repoCapybara1);
+        myRestService.patchCapybaraById(existingCapybara, 2L);
     }
 
     @Test
     public void addCapybaraTest() {
-        Capybara repoCapybara = new Capybara("Test", 2);
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
-        when(stringService.uppercase("Test")).thenReturn("TEST");
+        Capybara capybara = new Capybara("Test", 2);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withSuccess("", MediaType.APPLICATION_JSON));
 
-        myRestService.addCapybara(repoCapybara);
-
-        verify(stringService).uppercase("Test");
-        verify(capybaraRepository).save(repoCapybara);
+        myRestService.addCapybara(capybara);
     }
-
     @Test
     public void getAllCapybaraObjectsTest() {
-        List<Capybara> repoCapybaraList = new ArrayList<>();
-        Capybara repoCapybara1 = new Capybara("Test1", 2);
-        Capybara repoCapybara2 = new Capybara("Test2", 3);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/"))
+                .andRespond(MockRestResponseCreators.withSuccess("""
+                        [{"id":1,"name":"Test1","age":2},{"id":2,"name":"Test2","age":3}]
+                        """, MediaType.APPLICATION_JSON));
 
-        repoCapybaraList.add(repoCapybara1);
-        repoCapybaraList.add(repoCapybara2);
-
-        when(capybaraRepository.findAll()).thenReturn(repoCapybaraList);
-        when(stringService.lowercase("Test1")).thenReturn("Test1");
-        when(stringService.lowercase("Test2")).thenReturn("Test2");
-
-        List<Capybara> result = myRestService.getAllCapybaraObjects();
-
-        assertEquals(2, result.size());
-        assertEquals("Test1", result.get(0).getName());
-        assertEquals("Test2", result.get(1).getName());
-
-        verify(capybaraRepository).findAll();
-        verify(stringService).lowercase("Test1");
-        verify(stringService).lowercase("Test2");
-    }
-
-
-    @Test
-    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() throws InvalidInputCapybaraException {
-        Capybara repoCapybara = new Capybara("Test", 0);
-
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
-        when(stringService.uppercase("Test")).thenReturn("TEST");
-        when(stringService.lowercase("TEST")).thenReturn("Test");
-
-        assertThrows(InvalidInputCapybaraException.class, () -> this.myRestService.addCapybara(repoCapybara));
-
+        List<Capybara> capybaraList = myRestService.getAllCapybaraObjects();
+        assertEquals(2, capybaraList.size());
+        assertEquals("Test1", capybaraList.getFirst().getName());
+        assertEquals("Test2", capybaraList.get(1).getName());
     }
 
     @Test
-    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() throws InvalidInputCapybaraException {
-        Capybara repoCapybara = new Capybara("", 2);
+    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() {
+        Capybara capybara = new Capybara("Test", 0);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
 
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(repoCapybara));
-        when(stringService.uppercase("")).thenReturn("");
-        when(stringService.lowercase("")).thenReturn("");
+        assertThrows(InvalidInputCapybaraException.class, () -> myRestService.addCapybara(capybara));
+    }
+    @Test
+    public void addCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() {
+        Capybara capybara = new Capybara("", 2);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.BAD_REQUEST));
 
-        assertThrows(InvalidInputCapybaraException.class, () -> this.myRestService.addCapybara(repoCapybara));
+        assertThrows(InvalidInputCapybaraException.class, () -> myRestService.addCapybara(capybara));
     }
 
     @Test
-    public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() throws CapybaraAlreadyExists {
-        Capybara repoCapybara = new Capybara("Test", 2);
+    public void addCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
+        Capybara capybara = new Capybara("Test", 2);
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/add"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.CONFLICT));
 
-        when(stringService.uppercase("Test")).thenReturn("TEST");
-
-        repoCapybara.setIdentification();
-        long existingIdentification = repoCapybara.getIdentification();
-
-        when(capybaraRepository.findByIdentification(existingIdentification)).thenReturn(Optional.of(repoCapybara));
-
-        assertThrows(CapybaraAlreadyExists.class, () -> this.myRestService.addCapybara(repoCapybara));
+        assertThrows(CapybaraAlreadyExists.class, () -> myRestService.addCapybara(capybara));
     }
 
     @Test
     public void patchCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        Capybara capybaraToPatch = new Capybara();
+        long id = 2L;
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/" + id))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
-        when(capybaraRepository.findById(2L)).thenReturn(Optional.empty());
-
-        assertThrows(CapybaraNotFoundException.class, () -> this.myRestService.patchCapybaraById(capybaraToPatch, 2L));
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.patchCapybaraById(new Capybara("name", 2), id));
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() throws InvalidInputCapybaraException {
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToNameTest() {
         Capybara capybaraToSwitchTo = new Capybara("", 2);
         Capybara existingCapybara = new Capybara("Test2", 3);
 
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/2"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK));
 
         assertThrows(InvalidInputCapybaraException.class, () -> myRestService.patchCapybaraById(capybaraToSwitchTo, 2L));
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() throws InvalidInputCapybaraException {
+    public void patchCapybaraThrowsExceptionInvalidInputCapybaraDueToAgeTest() {
         Capybara capybaraToSwitchTo = new Capybara("Test", 0);
         Capybara existingCapybara = new Capybara("Test", 3);
 
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/2"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.OK));
 
         assertThrows(InvalidInputCapybaraException.class, () -> myRestService.patchCapybaraById(capybaraToSwitchTo, 2L));
     }
 
     @Test
-    public void patchCapybaraThrowsExceptionCapybaraAlreadyExistsTest() throws CapybaraAlreadyExists {
+    public void patchCapybaraThrowsExceptionCapybaraAlreadyExistsTest() {
         Capybara capybara = new Capybara("Test", 2);
         Capybara existingCapybara = new Capybara("Test", 2);
 
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.of(existingCapybara));
-        when(capybaraRepository.findByIdentification(102)).thenReturn(Optional.of(existingCapybara));
-        when(stringService.uppercase("Test")).thenReturn("TEST");
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/patch/10"))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.CONFLICT));
 
-        assertThrows(CapybaraAlreadyExists.class, () -> myRestService.patchCapybaraById(capybara, 2L));
+        assertThrows(CapybaraAlreadyExists.class, () -> myRestService.patchCapybaraById(existingCapybara, 10L));
     }
 
     @Test
-    public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+    public void deleteCapybaraThrowsExceptionCapybaraNotFoundTest() {
+        long id = 2L;
 
-        assertThrows(CapybaraNotFoundException.class, () -> myRestService.deleteCapybaraById(2L));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/delete/" + id))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.deleteCapybaraById(id));
     }
 
     @Test
-    public void getByNameThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
-        when(stringService.lowercase("TEST")).thenReturn("Test");
+    public void getByNameThrowsExceptionCapybaraNotFoundTest() {
+        String name = "TEST";
 
-        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByName("TEST"));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/name/" + name))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByName(name));
     }
 
     @Test
-    public void getByAgeThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+    public void getByAgeThrowsExceptionCapybaraNotFoundTest() {
+        int age = 2;
 
-        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByAge(2));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/age/" + age))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
+
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getByAge(age));
     }
 
     @Test
-    public void getByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        when(capybaraRepository.findById(Long.valueOf(2))).thenReturn(Optional.empty());
+    public void getByIdThrowsExceptionCapybaraNotFoundTest() {
+        long id = 2L;
 
-        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getById(2L));
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/find/id/" + id))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
+        assertThrows(CapybaraNotFoundException.class, () -> myRestService.getById(id));
     }
 
     @Test
     public void getAllCapybaraObjectsThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
-        when(capybaraRepository.findAll()).thenReturn(Collections.emptyList());
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/"))
+                .andRespond(MockRestResponseCreators.withSuccess("[]", MediaType.APPLICATION_JSON));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getAllCapybaraObjects());
     }
@@ -267,34 +276,11 @@ public class MyRestServiceTest {
     @Test
     public void getInformationOfCapybaraByIdThrowsExceptionCapybaraNotFoundTest() throws CapybaraNotFoundException {
         long id = 1L;
-        when(capybaraRepository.findById(id)).thenReturn(Optional.empty());
+
+        customizer.getServer().expect(MockRestRequestMatchers.requestTo("/capybara/get/information/" + id))
+                .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
 
         assertThrows(CapybaraNotFoundException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
     }
 
-    @Test
-    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIOExceptionTest() throws IOException {
-        long id = 1L;
-        Capybara capybara = new Capybara();
-        when(capybaraRepository.findById(id)).thenReturn(Optional.of(capybara));
-
-        PDPageContentStream contentStreamMock = mock(PDPageContentStream.class);
-        doThrow(new IOException("IOException Mock")).when(contentStreamMock).close();
-
-        assertThrows(RuntimeException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
-    }
-
-    @Test
-    public void getInformationOfCapybaraByIdThrowsRuntimeExceptionByIllegalAccessExceptionTest() throws IllegalAccessException {
-        long id = 1L;
-        Capybara capybara = new Capybara();
-        when(capybaraRepository.findById(id)).thenReturn(Optional.of(capybara));
-
-        Field mockField = mock(Field.class);
-        doThrow(new IllegalAccessException("IllegalAccessException Mock")).when(mockField).get(any());
-
-        assertThrows(RuntimeException.class, () -> myRestService.getInformationOfCapybaraById(id, mock(HttpServletResponse.class)));
-    }
-
 }
-

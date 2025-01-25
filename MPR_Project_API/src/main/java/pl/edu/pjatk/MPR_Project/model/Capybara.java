@@ -61,4 +61,14 @@ public class Capybara {
         }
         this.identification = identification;
     }
+
+    @Override
+    public String toString() {
+        return "Capybara{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", identification=" + identification +
+                '}';
+    }
 }

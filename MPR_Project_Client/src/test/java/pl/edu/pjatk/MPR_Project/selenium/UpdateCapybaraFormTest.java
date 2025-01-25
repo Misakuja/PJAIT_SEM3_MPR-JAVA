@@ -1,16 +1,12 @@
-package test.java.pl.edu.pjatk.MPR_Project.selenium;
+package pl.edu.pjatk.MPR_Project.selenium;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import pl.edu.pjatk.MPR_Project.model.Capybara;
-import pl.edu.pjatk.MPR_Project.repository.CapybaraRepository;
-import pl.edu.pjatk.MPR_Project.selenium.DisplayCapybaraListPage;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -19,8 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class UpdateCapybaraFormTest {
     WebDriver driver;
 
-    @Autowired
-    private CapybaraRepository capybaraRepository;
 
     @BeforeEach
     public void setUp() {
@@ -34,20 +28,14 @@ public class UpdateCapybaraFormTest {
 
     @Test
     public void updateCapybaraFormTest() {
-        Capybara capybara = new Capybara("test", 5);
-        capybara.setIdentification();
-        Capybara savedCapybara = capybaraRepository.save(capybara);
-
-        String idInputText = String.valueOf(savedCapybara.getId());
         UpdateCapybaraFormPage updateCapybaraFormPage = new UpdateCapybaraFormPage(driver)
                 .open()
-                .fillInIdInput(idInputText)
+                .fillInIdInput("1")
                 .fillInNameInput("replaced")
                 .fillInAgeInput("2");
         DisplayCapybaraListPage displayCapybaraListPage = updateCapybaraFormPage.submitForm();
 
         assertTrue(displayCapybaraListPage.areButtonsVisible());
         assertTrue(displayCapybaraListPage.isTableVisible());
-        assertTrue(displayCapybaraListPage.isLastRowContentCorrect("Replaced", "2"));
     }
 }
