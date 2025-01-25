@@ -1,14 +1,12 @@
 package pl.edu.pjatk.MPR_Project.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Capybara {
     private String name;
     private int age;
+
     private long identification;
 
     @Id

@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project;
+package pl.edu.pjatk.MPR_Project.unitTests;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;

@@ -1,4 +1,4 @@
-package test.java.pl.edu.pjatk.MPR_Project;
+package pl.edu.pjatk.MPR_Project.unitTests;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
