@@ -66,7 +66,6 @@ public class ControllerIntegrationTests {
                 .body("name", equalTo("Testcapy1"))
                 .body("age", equalTo(2));
     }
-
 //    @Test
 //    void shouldGetCapybarasByName() {
 //        given()
