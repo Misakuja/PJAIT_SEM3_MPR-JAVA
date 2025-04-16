@@ -1,5 +1,5 @@
-PJAIT, Semester 3, Java Spring
-Repo containing a completed projet created during 'Programming Methods' course at PJAIT. Includes:
+# PJAIT, Semester 3, Programming Methods
+Repo containing a completed Java Spring projet created during 'Programming Methods' course at PJAIT. Includes:
 - Backend and frontend communication.
 - Page displaying all database entries.
 - Forms for POST (create), PUT (update), and DELETE (remove) operations.
